@@ -1,5 +1,4 @@
 import { Calendar } from "react-calendar"
-import "react-calendar/dist/Calendar.css"
 import './calendar.css'
 import { useState } from "react"
 import { usePanchangam } from "@/hooks/usePanchangam"
@@ -10,11 +9,10 @@ export default function CalendarCustomDays() {
   const { data } = usePanchangam(activeDate)
 
   return (
-    <div className="h-full w-full">
+    <div className="my-calendar h-auto w-full">
       <Calendar
         formatDay={() => ""}
         calendarType="gregory"
-        showNeighboringMonth={true}
         activeStartDate={activeDate}
         onActiveStartDateChange={({ activeStartDate }) => {
           if (activeStartDate) {
@@ -22,24 +20,9 @@ export default function CalendarCustomDays() {
           }
         }}
         className="h-full w-full"
-        tileClassName={({ date, view }) => {
-          if (view !== "month") return null
-
-          if (!data) return null
-          const key = [
-            date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, "0"),
-            String(date.getDate()).padStart(2, "0"),
-          ].join("-")
-
-          const dateData = data[key as keyof typeof data]
-
-          return dateData?.is_pournami ? "pournami-tile" : ""
-        }}
+        tileClassName={() => "custom-tile"}
         tileContent={({ date, view }) => {
           if (view !== "month") return null
-
-
           if (!data) return null
           const key = [
             date.getFullYear(),
@@ -63,11 +46,10 @@ export default function CalendarCustomDays() {
                   <p className=" text-[12px]  text-transparent">
                     {"dummy text"}
                   </p>
-
               }
 
-              <div className="relative">
-                <p className="text-2xl h-full items-center">
+              <div className="relative h-full w-full">
+                <p className="text-2xl w-full text-center ">
                   {date.getDate()}
                 </p>
                 <div className="absolute top-0 right-0">
@@ -79,14 +61,19 @@ export default function CalendarCustomDays() {
                     />
                   )}
                 </div>
-                <div className="flex flex-row items-end justify-between">
+                <div className="flex flex-row items-end justify-between w-full">
                   <p className="text-sm">
                     {dateData.malayalam_day}
                   </p>
 
 
-                  <div className="text-center text-[10px] leading-none">
-                    {dateData.nakshatra}
+                  <div className="flex-col">
+                    <div className="text-center text-[12px] leading-none">
+                      {dateData.kollavarsham_nakshatra}
+                    </div>
+                    <div className="text-center text-[10px] leading-none">
+                      {dateData.nakshatra}
+                    </div>
                   </div>
                 </div>
               </div>
