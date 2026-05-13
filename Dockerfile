@@ -11,7 +11,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy static files from builder
-COPY --from=builder /app/.output/public /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy custom Nginx config (optional)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
