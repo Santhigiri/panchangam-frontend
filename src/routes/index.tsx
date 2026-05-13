@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@/components/ui/button"
 import CalendarCustomDays from "@/components/pages/homepage"
 
 export const Route = createFileRoute("/")({ component: App })
