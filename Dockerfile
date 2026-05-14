@@ -7,8 +7,8 @@ RUN npm install
 
 
 # Pass the build argument
-ARG _VITE_APP_BASE_URL
-ENV VITE_APP_BASE_URL=$_VITE_APP_BASE_URL
+ARG VITE_APP_BASE_URL
+ENV VITE_APP_BASE_URL=$VITE_APP_BASE_URL
 
 COPY . .
 RUN npm run build
