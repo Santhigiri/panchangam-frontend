@@ -58,25 +58,50 @@ export default function CalendarCustomDays() {
 
           return (
             <div className="flex h-full w-full flex-col">
-              <p className="text-2xl text-center">
-                {date.getDate()}
-              </p>
-
-              {dateData.is_pournami && (
-                <img
-                  src="/moon.png"
-                  alt="full-moon"
-                  className="w-6 h-6"
-                />
-              )}
-
-              <p className={`text-sm ${neighbouringMonthStyle}`}>
-                {dateData.calculated_ml_day}
-              </p>
-
-              <p className={`text-[10px] ${neighbouringMonthStyle}`}>
-                {dateData.nakshatra}
-              </p>
+              {
+                dateData.calculated_ml_day === 1 ? (
+                  <p className="bg-green-800 text-[12px] text-orange-300">
+                    {dateData.calculated_ml_month}
+                  </p>
+                ) :
+                  <p className=" text-[12px]  text-transparent">
+                    {"dummy text"}
+                  </p>
+              }
+              {
+                dateData.nakshatra === "Chothi" ? (
+                  <p className="bg-green-800 text-[12px] text-orange-300">
+                    {"Chothi Theertha Yathra"}
+                  </p>
+                ) :
+                  <p className=" text-[12px]  text-transparent">
+                    {"dummy text"}
+                  </p>
+              }
+              <div className="relative h-full w-full">
+                <p className={`text-2xl w-full text-center ${neighbouringMonthStyle}`}>
+                  {date.getDate()}
+                </p>
+                <div className="absolute top-0 right-0">
+                  {dateData.is_pournami && (
+                    <img
+                      src="/moon.png"
+                      alt="full-moon"
+                      className="w-6 h-6"
+                    />
+                  )}
+                </div>
+                <div className="flex flex-row items-end justify-between w-full p-2">
+                  <p className={`text-sm ${neighbouringMonthStyle} text-blue-600`}>
+                    {dateData.calculated_ml_day}
+                  </p>
+                  <div className="flex-col">
+                    <div className={`text-center text-[10px] leading-none ${neighbouringMonthStyle}`}>
+                      {dateData.nakshatra}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )
         }}
