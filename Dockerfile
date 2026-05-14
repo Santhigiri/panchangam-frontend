@@ -4,6 +4,12 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
+
+
+# Pass the build argument
+ARG _VITE_APP_BASE_URL
+ENV VITE_APP_BASE_URL=$_VITE_APP_BASE_URL
+
 COPY . .
 RUN npm run build
 

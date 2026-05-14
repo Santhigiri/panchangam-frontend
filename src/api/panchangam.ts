@@ -1,14 +1,23 @@
+
+const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
+
 export async function getPanchangam(
   year: number,
   month: string,
-  latitude: number = 8.631891978113215,
-  longitude: number = 76.8977255008525
-) {
-  const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
+  latitude: number = 8.6318,
+  longitude: number = 76.897) {
 
   const response = await fetch(
     `${APP_BASE_URL}/panchangam/monthly?year=${year}&month=${month}&latitude=${latitude}&longitude=${longitude}`
+    , {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    }
   )
+  console.log(import.meta.env.VITE_APP_BASE_URL)
 
   if (!response.ok) {
     throw new Error("Failed to fetch panchangam")
