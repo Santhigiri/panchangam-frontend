@@ -60,18 +60,8 @@ export default function CalendarCustomDays() {
             <div className="flex h-full w-full flex-col">
               {
                 dateData.calculated_ml_day === 1 ? (
-                  <p className="bg-green-800 text-[12px] text-orange-300">
+                  <p className="bg-green-800 text-[14px] text-orange-300">
                     {dateData.calculated_ml_month}
-                  </p>
-                ) :
-                  <p className=" text-[12px]  text-transparent">
-                    {"dummy text"}
-                  </p>
-              }
-              {
-                dateData.nakshatra === "Chothi" ? (
-                  <p className="bg-green-800 text-[12px] text-orange-300">
-                    {"Chothi Theertha Yathra"}
                   </p>
                 ) :
                   <p className=" text-[12px]  text-transparent">
@@ -96,7 +86,7 @@ export default function CalendarCustomDays() {
                     {dateData.calculated_ml_day}
                   </p>
                   <div className="flex-col">
-                    <div className={`text-center text-[10px] leading-none ${neighbouringMonthStyle}`}>
+                    <div className={`text-center text-[14px] leading-none ${neighbouringMonthStyle}`}>
                       {dateData.nakshatra}
                     </div>
                   </div>
