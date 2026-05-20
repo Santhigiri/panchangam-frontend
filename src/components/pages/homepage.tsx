@@ -151,9 +151,9 @@ export default function CalendarCustomDays() {
             <div>Sunset: {getFormattedTime(selectedDateData.sunset)}</div>
             <div>Is Pournami: {String(selectedDateData.is_pournami)}</div>
           </div>
-          <div className="grid grid-cols-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col">
-              <p className="text-md font-semibold">Thithi Transitions</p>
+              <p className="text-sm lg:text-md font-semibold">Thithi Transitions</p>
               {
                 selectedDateData.thithi_transitions.map(thithi => (
                   <div>
@@ -164,7 +164,7 @@ export default function CalendarCustomDays() {
             </div>
 
             <div className="flex flex-col">
-              <p className="text-md font-semibold">Nakshatra Transitions</p>
+              <p className="text-sm lg:text-md font-semibold">Nakshatra Transitions</p>
               {
                 selectedDateData.nakshatra_transitions.map(nakshatra => (
                   <div>
