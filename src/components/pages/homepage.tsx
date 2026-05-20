@@ -101,12 +101,12 @@ export default function CalendarCustomDays() {
             <div className="flex h-full w-full flex-col">
               {
                 dateData.kv.kv_day === 1 ? (
-                  <p className="bg-green-800 md:text-[8px] lg:text-[14px] text-orange-300">
+                  <p className="bg-green-800 text-[10px] lg:text-[14px] text-orange-300">
                     {dateData.kv.kv_month_name_ml}
                   </p>
                 ) :
-                  <p className=" text-[12px]  text-transparent">
-                    {"dummy text"}
+                  <p className="text-[10px] lg:text-[14px]  text-transparent">
+                    {dateData.kv.kv_month_name_ml}
                   </p>
               }
               <div className="relative h-full w-full">
@@ -127,7 +127,7 @@ export default function CalendarCustomDays() {
                     {dateData.kv.kv_day}
                   </p>
                   <div className="flex-col">
-                    <div className={`text-center text-[11px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
+                    <div className={`text-center text-[10px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
                       {dateData.nakshatra}
                     </div>
                   </div>
