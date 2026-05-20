@@ -3,6 +3,17 @@ import "./calendar.css"
 import { useMemo, useState } from "react"
 import { usePanchangam } from "@/hooks/usePanchangam"
 
+function getFormattedTime(datetime: string): string {
+  const options: Intl.DateTimeFormatOptions = {
+    hour: 'numeric', minute: 'numeric',
+    hour12: true
+  };
+
+  const locale = 'en-IN'
+
+  return new Date(datetime).toLocaleTimeString(locale, options)
+
+}
 
 function getFormattedDateTime(datetime: string): string {
 
@@ -15,7 +26,6 @@ function getFormattedDateTime(datetime: string): string {
   const locale = 'en-IN'
 
   return new Date(datetime).toLocaleString(locale, options)
-
 }
 
 
@@ -41,6 +51,8 @@ export default function CalendarCustomDays() {
     <div className="h-auto w-full">
       <Calendar
         formatDay={() => ""}
+        minDate={new Date(2020, 0, 1)}
+        maxDate={new Date(2030, 11, 31)}
         calendarType="gregory"
         activeStartDate={activeDate}
         onClickDay={(day) => {
@@ -76,9 +88,9 @@ export default function CalendarCustomDays() {
           return (
             <div className="flex h-full w-full flex-col">
               {
-                dateData.calculated_ml_day === 1 ? (
+                dateData.kv.kv_day === 1 ? (
                   <p className="bg-green-800 text-[14px] text-orange-300">
-                    {dateData.calculated_ml_month}
+                    {dateData.kv.kv_month_name_ml}
                   </p>
                 ) :
                   <p className=" text-[12px]  text-transparent">
@@ -100,7 +112,7 @@ export default function CalendarCustomDays() {
                 </div>
                 <div className="flex flex-row items-end justify-between w-full p-2">
                   <p className={`text-sm ${neighbouringMonthStyle} text-blue-600`}>
-                    {dateData.calculated_ml_day}
+                    {dateData.kv.kv_day}
                   </p>
                   <div className="flex-col">
                     <div className={`text-center text-[14px] leading-none ${neighbouringMonthStyle}`}>
@@ -118,13 +130,13 @@ export default function CalendarCustomDays() {
         <div className="flex flex-col gap-1 border p-4">
           <div className="mt-4 grid grid-cols-3">
             <div>Date: {selectedDateData.date.split('T')[0]}</div>
-            <div>Malayalam Date: {selectedDateData.calculated_ml_day}</div>
-            <div>Malayalam Month: {selectedDateData.calculated_ml_month}</div>
-            <div>Malayalam Year: {selectedDateData.calculated_ml_year}</div>
+            <div>Malayalam Date: {selectedDateData.kv.kv_day}</div>
+            <div>Malayalam Month: {selectedDateData.kv.kv_month_name_ml}</div>
+            <div>Malayalam Year: {selectedDateData.kv.kv_year}</div>
             <div>Nakshatra: {selectedDateData.nakshatra}</div>
             <div>Thithi: {selectedDateData.thithi}</div>
-            <div>Sunrise: {selectedDateData.sunrise}</div>
-            <div>Sunset: {selectedDateData.sunset}</div>
+            <div>Sunrise: {getFormattedTime(selectedDateData.sunrise)}</div>
+            <div>Sunset: {getFormattedTime(selectedDateData.sunset)}</div>
             <div>Is Pournami: {String(selectedDateData.is_pournami)}</div>
           </div>
           <div className="grid grid-cols-2">
@@ -133,7 +145,7 @@ export default function CalendarCustomDays() {
               {
                 selectedDateData.thithi_transitions.map(thithi => (
                   <div>
-                    <p>{thithi.thithi_name} {getFormattedDateTime(thithi.ist_start_time)} - {getFormattedDateTime(thithi.ist_end_time)}</p>
+                    <p>{thithi.name} {getFormattedDateTime(thithi.start_time)} - {getFormattedDateTime(thithi.end_time)}</p>
                   </div>
                 ))
               }
@@ -144,7 +156,7 @@ export default function CalendarCustomDays() {
               {
                 selectedDateData.nakshatra_transitions.map(nakshatra => (
                   <div>
-                    <p>{nakshatra.nakshatra_name} {getFormattedDateTime(nakshatra.start_time)} - {getFormattedDateTime(nakshatra.end_time)}</p>
+                    <p>{nakshatra.name} {getFormattedDateTime(nakshatra.start_time)} - {getFormattedDateTime(nakshatra.end_time)}</p>
                   </div>
                 ))
               }
