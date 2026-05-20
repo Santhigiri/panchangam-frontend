@@ -3,6 +3,18 @@ import "./calendar.css"
 import { useMemo, useState } from "react"
 import { usePanchangam } from "@/hooks/usePanchangam"
 
+
+function getFormattedDate(datetime: string): string {
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric', month: 'short', day: 'numeric'
+  };
+
+  const locale = 'en-IN'
+
+  return new Date(datetime).toLocaleString(locale, options)
+}
+
 function getFormattedTime(datetime: string): string {
   const options: Intl.DateTimeFormatOptions = {
     hour: 'numeric', minute: 'numeric',
@@ -129,7 +141,7 @@ export default function CalendarCustomDays() {
       {selectedDateData && (
         <div className="flex flex-col gap-1 border p-4 text-[12px] lg:text-[14px]">
           <div className="mt-4 grid grid-cols-3">
-            <div>Date: {selectedDateData.date.split('T')[0]}</div>
+            <div>Date: {getFormattedDate(selectedDateData.date)}</div>
             <div>Malayalam Date: {selectedDateData.kv.kv_day}</div>
             <div>Malayalam Month: {selectedDateData.kv.kv_month_name_ml}</div>
             <div>Malayalam Year: {selectedDateData.kv.kv_year}</div>
