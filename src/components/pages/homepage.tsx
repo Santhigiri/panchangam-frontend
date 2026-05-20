@@ -89,7 +89,7 @@ export default function CalendarCustomDays() {
             <div className="flex h-full w-full flex-col">
               {
                 dateData.kv.kv_day === 1 ? (
-                  <p className="bg-green-800 text-[14px] text-orange-300">
+                  <p className="bg-green-800 md:text-[8px] lg:text-[14px] text-orange-300">
                     {dateData.kv.kv_month_name_ml}
                   </p>
                 ) :
@@ -98,7 +98,7 @@ export default function CalendarCustomDays() {
                   </p>
               }
               <div className="relative h-full w-full">
-                <p className={`text-2xl w-full text-center ${neighbouringMonthStyle}`}>
+                <p className={`text-[12px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
                   {date.getDate()}
                 </p>
                 <div className="absolute top-0 right-0">
@@ -110,12 +110,12 @@ export default function CalendarCustomDays() {
                     />
                   )}
                 </div>
-                <div className="flex flex-row items-end justify-between w-full p-2">
-                  <p className={`text-sm ${neighbouringMonthStyle} text-blue-600`}>
+                <div className="flex flex-col lg:flex-row items-center lg:items-end justify-end lg:justify-between w-full p-2">
+                  <p className={`text-[10px] lg:text-sm ${neighbouringMonthStyle} text-blue-600`}>
                     {dateData.kv.kv_day}
                   </p>
                   <div className="flex-col">
-                    <div className={`text-center text-[14px] leading-none ${neighbouringMonthStyle}`}>
+                    <div className={`text-center text-[11px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
                       {dateData.nakshatra}
                     </div>
                   </div>
@@ -127,7 +127,7 @@ export default function CalendarCustomDays() {
       />
 
       {selectedDateData && (
-        <div className="flex flex-col gap-1 border p-4">
+        <div className="flex flex-col gap-1 border p-4 text-[12px] lg:text-[14px]">
           <div className="mt-4 grid grid-cols-3">
             <div>Date: {selectedDateData.date.split('T')[0]}</div>
             <div>Malayalam Date: {selectedDateData.kv.kv_day}</div>
