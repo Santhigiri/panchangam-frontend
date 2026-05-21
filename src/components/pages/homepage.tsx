@@ -27,7 +27,9 @@ function getFormattedTime(datetime: string): string {
 
 }
 
-function getFormattedDateTime(datetime: string): string {
+function getFormattedDateTime(datetime: string | null): string {
+
+  if (datetime === null) return ""
 
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric', month: 'short', day: 'numeric',
@@ -128,7 +130,7 @@ export default function CalendarCustomDays() {
                   </p>
                   <div className="flex-col">
                     <div className={`text-center text-[10px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
-                      {dateData.nakshatra}
+                      {dateData.nakshatra.ml}
                     </div>
                   </div>
                 </div>
@@ -145,8 +147,8 @@ export default function CalendarCustomDays() {
             <div>Malayalam Date: {selectedDateData.kv.kv_day}</div>
             <div>Malayalam Month: {selectedDateData.kv.kv_month_name_ml}</div>
             <div>Malayalam Year: {selectedDateData.kv.kv_year}</div>
-            <div>Nakshatra: {selectedDateData.nakshatra}</div>
-            <div>Thithi: {selectedDateData.thithi}</div>
+            <div>Nakshatra: {selectedDateData.nakshatra.ml}</div>
+            <div>Thithi: {selectedDateData.thithi.ml} {selectedDateData.thithi.paksha.ml}</div>
             <div>Sunrise: {getFormattedTime(selectedDateData.sunrise)}</div>
             <div>Sunset: {getFormattedTime(selectedDateData.sunset)}</div>
             <div>Is Pournami: {String(selectedDateData.is_pournami)}</div>
@@ -155,10 +157,8 @@ export default function CalendarCustomDays() {
             <div className="flex flex-col">
               <p className="text-sm lg:text-md font-semibold">Thithi Transitions</p>
               {
-                selectedDateData.thithi_transitions.map(thithi => (
-                  <div>
-                    <p>{thithi.name} {getFormattedDateTime(thithi.start_time)} - {getFormattedDateTime(thithi.end_time)}</p>
-                  </div>
+                selectedDateData.thithi_transitions.map((thithi, index) => (
+                  <p key={`thithi-${index}`}>{thithi.thithi.ml} {thithi.thithi.paksha.ml} {getFormattedDateTime(thithi.start_time)} - {thithi.end_time ? getFormattedDateTime(thithi.end_time) : ""}</p>
                 ))
               }
             </div>
@@ -166,13 +166,24 @@ export default function CalendarCustomDays() {
             <div className="flex flex-col">
               <p className="text-sm lg:text-md font-semibold">Nakshatra Transitions</p>
               {
-                selectedDateData.nakshatra_transitions.map(nakshatra => (
-                  <div>
-                    <p>{nakshatra.name} {getFormattedDateTime(nakshatra.start_time)} - {getFormattedDateTime(nakshatra.end_time)}</p>
-                  </div>
+                selectedDateData.nakshatra_transitions.map((nakshatra, index) => (
+                  <p key={`nakshatra-${index}`}>{nakshatra.nakshatra.ml} {getFormattedDateTime(nakshatra.start_time)} - {nakshatra.end_time ? getFormattedDateTime(nakshatra.end_time) : ""}</p>
                 ))
               }
             </div>
+            {
+              selectedDateData.santhigiri_significant_dates.length > 0 && (
+
+                <div className="flex flex-col">
+                  <p className="text-sm lg:text-md font-semibold">Santhigiri Significant Days</p>
+                  {
+                    selectedDateData.santhigiri_significant_dates.map((significance, index) => (
+                      <p key={`significance-${index}`}>{significance.name}</p>
+                    ))
+                  }
+                </div>
+              )
+            }
           </div>
         </div>
       )}

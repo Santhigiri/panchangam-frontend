@@ -1,3 +1,4 @@
+import { monthlyPanchangamData } from "./schemas/panchangamData"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -24,5 +25,16 @@ export async function getPanchangam(
     throw new Error("Failed to fetch panchangam")
   }
 
-  return response.json()
+  const json = await response.json()
+
+  try {
+    const data = await monthlyPanchangamData.parseAsync(json)
+    console.log(data)
+    return data
+
+  } catch (e) {
+    console.error(e)
+
+  }
+
 }
