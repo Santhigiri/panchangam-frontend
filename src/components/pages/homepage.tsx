@@ -148,6 +148,7 @@ export default function CalendarCustomDays() {
             <div>Malayalam Month: {selectedDateData.kv.kv_month_name_ml}</div>
             <div>Malayalam Year: {selectedDateData.kv.kv_year}</div>
             <div>Nakshatra: {selectedDateData.nakshatra.ml}</div>
+            <div>Nazhika from sunrise: {selectedDateData.nazhika_from_sunrise}</div>
             <div>Thithi: {selectedDateData.thithi.ml} {selectedDateData.thithi.paksha.ml}</div>
             <div>Sunrise: {getFormattedTime(selectedDateData.sunrise)}</div>
             <div>Sunset: {getFormattedTime(selectedDateData.sunset)}</div>

@@ -63,6 +63,7 @@ export const panchangamData = z.object({
   nakshatra_transitions: z.array(nakshatra_transition),
   sunrise: isoDatetime,
   sunset: isoDatetime,
+  nazhika_from_sunrise: z.number(),
   santhigiri_significant_dates: z.array(santhigiri_significant_date)
 })
 
