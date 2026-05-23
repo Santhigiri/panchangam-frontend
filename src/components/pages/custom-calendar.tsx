@@ -1,57 +1,51 @@
-import { useState } from "react";
+"use client"
 
-import dayjs from 'dayjs'
+import * as React from "react"
+import { addDays } from "date-fns"
+import { type DateRange } from "react-day-picker"
 
-import weekOfYear from 'dayjs/plugin/weekOfYear'
-import weekday from 'dayjs/plugin/weekday'
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+import { Card, CardContent } from "@/components/ui/card"
 
-dayjs.extend(weekOfYear)
-dayjs.extend(weekday)
+export function CustomCalendar() {
+  const [range, setRange] = React.useState<DateRange | undefined>({
+    from: new Date(new Date().getFullYear(), 11, 8),
+    to: addDays(new Date(new Date().getFullYear(), 11, 8), 10),
+  })
 
-function getCurrentDate(): Date {
-  return new Date(Date.now())
-}
+  return (
+    <Card className="mx-auto w-fit p-0">
+      <CardContent className="p-0">
+        <Calendar
+          mode="range"
+          defaultMonth={range?.from}
+          selected={range}
+          onSelect={setRange}
+          numberOfMonths={1}
+          captionLayout="dropdown"
+          className="[--cell-size:--spacing(10)] md:[--cell-size:--spacing(12)]"
+          formatters={{
+            formatMonthDropdown: (date) => {
+              return date.toLocaleString("default", { month: "long" })
+            },
+          }}
+          components={{
+            DayButton: ({ children, modifiers, day, ...props }) => {
+              const isWeekend =
+                day.date.getDay() === 0 || day.date.getDay() === 6
 
-
-function getFirstDayOfWeek(year: number, month: number, targetDayOfWeek: number = 0): Date {
-
-  const firstDayOfMonth = new Date(year, month, 1)
-
-  const dayOfWeek = firstDayOfMonth.getDay()
-
-  const offset = (targetDayOfWeek - dayOfWeek) % 7
-
-}
-
-
-function getDays(year: number, month: number) {
-  const firstDayOfMonth = new Date(year, month, 1)
-
-  const dayOfWeek = firstDayOfMonth.getDay()
-
-  const offset = 
-
-  const firstDayOfWeek = if (firstDayOfMonth.day === 0) return firstDayOfMonth else firstDayOfMonth.weekday(-7)
-
-  for 
-
-
-
-
-
-  
-
-}
-
-
-
-
-
-export default function CustomCalendar() {
-
-  const [currentMonth, setCurrentMonth] = useState(getCurrentDate)
-
-
-
-  return ();
+              return (
+                <CalendarDayButton day={day} modifiers={modifiers} {...props}>
+                  {children}
+                  {!modifiers.outside && (
+                    <span>{isWeekend ? "$120" : "$100"}</span>
+                  )}
+                </CalendarDayButton>
+              )
+            },
+          }}
+        />
+      </CardContent>
+    </Card>
+  )
 }

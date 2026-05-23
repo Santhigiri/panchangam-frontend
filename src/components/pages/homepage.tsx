@@ -1,7 +1,9 @@
 import { Calendar } from "react-calendar"
 import "./calendar.css"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { usePanchangam } from "@/hooks/usePanchangam"
+import { Clock, Landmark, MoonIcon, Star, SunIcon, SunriseIcon, SunsetIcon } from "lucide-react";
+import type { ISODatetime, KollavarshamDate, Nakshatra, NakshatraTransition, SanthigiriSignificance, Thithi, ThithiTransition } from "@/api/schemas/panchangamData";
 
 
 function getFormattedDate(datetime: string): string {
@@ -18,7 +20,7 @@ function getFormattedDate(datetime: string): string {
 function getFormattedTime(datetime: string): string {
   const options: Intl.DateTimeFormatOptions = {
     hour: 'numeric', minute: 'numeric',
-    hour12: true
+    hour12: false
   };
 
   const locale = 'en-IN'
@@ -42,9 +44,166 @@ function getFormattedDateTime(datetime: string | null): string {
   return new Date(datetime).toLocaleString(locale, options)
 }
 
+type DateHeaderProps = {
+  date: Date,
+  kv_date: KollavarshamDate
+}
+
+function DateHeader({ date, kv_date }: DateHeaderProps) {
+  return (
+    <div className="flex flex-col">
+      <p className="font-playfair-display font-semibold text-2xl text-center col-span-2">{date.toLocaleDateString('default', { 'weekday': 'long' })}</p>
+      <p className="text-md font-inter font-medium text-[#B22B1D] text-center"> {date.toLocaleDateString('default', { 'month': 'long' })} {date.getDate()}, {date.getFullYear()}</p>
+      <p className="text-md font-inter font-medium text-[#B22B1D] text-center"> {kv_date.kv_month_name_en} {kv_date.kv_day}, {kv_date.kv_year}</p>
+    </div>
+  )
+}
 
 
-export default function CalendarCustomDays() {
+type SunriseSunsetProps = {
+  sunrise: ISODatetime,
+  sunset: ISODatetime
+}
+
+type MoonriseMoonsetProps = {
+  moonrise: ISODatetime,
+  moonset: ISODatetime
+}
+
+function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProps): ReactNode {
+
+  return (
+    <div className="grid grid-cols-2 justify-items-stretch gap-4">
+      <div className="bg-white rounded-md w-full col-span-1">
+        <div className="flex flex-row items-center gap-4 p-2">
+          <SunriseIcon />
+          <div className="flex flex-col">
+            <p className="font-inter text-[#554336] text-[12px] font-semibold">SUNRISE</p>
+            <p className="font-inter text-[#554336] text-[12px]">
+              {getFormattedTime(sunrise)}
+            </p>
+          </div>
+
+        </div>
+      </div>
+      <div className="bg-white rounded-md w-full col-span-1">
+
+        <div className="flex flex-row items-center gap-4 p-2">
+          <SunsetIcon />
+          <div className="flex flex-col">
+            <p className="font-inter text-[#554336] text-[12px] font-semibold">SUNSET</p>
+            <p className="font-inter text-[#554336] text-[12px]">
+              {getFormattedTime(sunset)}
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+function MoonriseMoonsetCard({ moonrise, moonset }: MoonriseMoonsetProps): ReactNode {
+
+  return (
+    <div className="bg-white rounded-md w-full">
+      <div className="flex flex-row items-center gap-4 p-2">
+        <MoonIcon />
+        <div className="flex flex-col">
+          <p className="font-inter text-[#554336] text-[12px] font-semibold">MOON</p>
+          <p className="font-inter text-[#554336] text-[12px]">
+            {getFormattedTime(moonrise)} - {getFormattedTime(moonset)}{/* TODO: uncomment when values are available */}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+type NakshatraTransitionCardProps = {
+  transitions: NakshatraTransition[],
+  current_nakshatra: Nakshatra
+}
+
+function NakshatraTransitionCard({ transitions, current_nakshatra }: NakshatraTransitionCardProps) {
+  return (
+    transitions.map((transition, idx) => (
+      <div key={`thithi-transition-${idx}`} className={`flex flex-col ${transition.nakshatra.en === current_nakshatra.en ? `bg-green-100` : `bg-white`}  border-l-4 border-l-amber-900 rounded-md p-4 m-2`} >
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-col">
+            <p className="font-semibold text-[12px] text-[#554336] ">NAKSHATRA</p>
+            <p className="font-medium text-2xl  font-playfair-display">{transition.nakshatra.en}</p>
+          </div>
+          <div className="flex">
+            <Star className="text-amber-200 h-10 w-10" />
+          </div>
+        </div>
+
+        <hr className="divide-y-4 divide-gray-800"></hr>
+        <div className="flex flex-row gap-2 mt-2">
+          <Clock className="w-4 h-4" />
+          <p className="text-[12px] font-inter"> {getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
+        </div>
+      </div >
+    ))
+
+  )
+}
+
+
+type ThithiTransitionCardProps = {
+  transitions: ThithiTransition[],
+  current_thithi: Thithi
+}
+
+
+function ThithiTransitionCard({ transitions, current_thithi }: ThithiTransitionCardProps) {
+  return (
+    transitions.map((transition, idx) => (
+      <div key={`nakshatra-transition-${idx}`} className={`flex flex-col ${transition.thithi.en === current_thithi.en ? `bg-green-100` : `bg-white`}  border-l-4 border-l-amber-900 rounded-md p-4 m-2`} >
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-col">
+            <p className="font-semibold text-[12px] text-[#554336] ">THITHI</p>
+            <p className="font-medium text-2xl font-playfair-display">{transition.thithi.en} ({transition.thithi.paksha.en})</p>
+          </div>
+          <div className="flex">
+            <MoonIcon className="text-amber-200 h-10 w-10" />
+          </div>
+        </div>
+
+        <hr className="divide-y-4 divide-gray-800"></hr>
+        <div className="flex flex-row gap-2 mt-2">
+          <Clock className="w-4 h-4" />
+          <p className="text-[12px] font-inter align-text-top">{getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
+        </div>
+      </div >
+    ))
+  )
+}
+
+export type AshramSignificanceProps = {
+  significances: SanthigiriSignificance[]
+}
+
+
+function AshramSignificance({ significances }: AshramSignificanceProps) {
+  return (
+    significances.map((significance: SanthigiriSignificance, idx) => (
+      <div key={`ashram-significance-${idx}`} className="flex flex-col p-4 gap-2 border-2 border-amber-800 rounded-md m-2">
+        <div className="flex flex-row items-start gap-2">
+          <Landmark className="w-4 h-4" />
+          <p className="text-amber-800 text-[12px] font-bold">ASHRAM SIGNIFICANCE</p>
+        </div>
+        <p className="font-playfair-display font-bold">{significance.name}</p>
+        <p className="font-inter text-[12px] font-light" >{significance.description}</p>
+      </div>
+    ))
+  )
+}
+
+
+
+export default function CalendarCustLomDays() {
   const [activeDate, setActiveDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -62,7 +221,7 @@ export default function CalendarCustomDays() {
   }, [data, selectedKey])
 
   return (
-    <div className="h-auto w-full">
+    <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 items-center md:items-start">
       <Calendar
         formatDay={() => ""}
         minDate={new Date(2020, 0, 1)}
@@ -77,7 +236,7 @@ export default function CalendarCustomDays() {
             setActiveDate(activeStartDate)
           }
         }}
-        className="h-full w-full"
+        className="w-full md:col-span-2"
         tileClassName={() => "custom-tile"}
         tileContent={({ date, view }) => {
           if (view !== "month") return null
@@ -103,11 +262,11 @@ export default function CalendarCustomDays() {
             <div className="flex h-full w-full flex-col">
               {
                 dateData.kv.kv_day === 1 ? (
-                  <p className="bg-green-800 text-[10px] lg:text-[14px] text-orange-300">
+                  <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50">
                     {dateData.kv.kv_month_name_ml}
                   </p>
                 ) :
-                  <p className="text-[10px] lg:text-[14px]  text-transparent">
+                  <p className="text-[10px] lg:text-[12px]  text-transparent">
                     {dateData.kv.kv_month_name_ml}
                   </p>
               }
@@ -120,16 +279,16 @@ export default function CalendarCustomDays() {
                     <img
                       src="/moon.png"
                       alt="full-moon"
-                      className="w-6 h-6"
+                      className="w-5 h-5"
                     />
                   )}
                 </div>
                 <div className="flex flex-col lg:flex-row items-center lg:items-end justify-end lg:justify-between w-full p-2">
-                  <p className={`text-[10px] lg:text-sm ${neighbouringMonthStyle} text-blue-600`}>
+                  <p className={`text-[10px] lg:text-[12px] ${neighbouringMonthStyle} text-blue-600`}>
                     {dateData.kv.kv_day}
                   </p>
                   <div className="flex-col">
-                    <div className={`text-center text-[10px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
+                    <div className={`text-center text-[10px] lg:text-[12px] leading-none ${neighbouringMonthStyle}`}>
                       {dateData.nakshatra.ml}
                     </div>
                   </div>
@@ -139,55 +298,63 @@ export default function CalendarCustomDays() {
           )
         }}
       />
+      <div className="md:col-span-1">
+        {
+          selectedDateData ? (
+            <div className="grid grid-col-2 justify-items-stretch">
+              <div className="col-span-2">
+                <DateHeader
+                  date={new Date(selectedDateData.date)}
+                  kv_date={selectedDateData.kv}
+                />
+              </div>
 
-      {selectedDateData && (
-        <div className="flex flex-col gap-1 border p-4 text-[12px] lg:text-[14px]">
-          <div className="mt-4 grid grid-cols-3">
-            <div>Date: {getFormattedDate(selectedDateData.date)}</div>
-            <div>Malayalam Date: {selectedDateData.kv.kv_day}</div>
-            <div>Malayalam Month: {selectedDateData.kv.kv_month_name_ml}</div>
-            <div>Malayalam Year: {selectedDateData.kv.kv_year}</div>
-            <div>Nakshatra: {selectedDateData.nakshatra.ml}</div>
-            <div>Nazhika from sunrise: {selectedDateData.nazhika_from_sunrise}</div>
-            <div>Thithi: {selectedDateData.thithi.ml} {selectedDateData.thithi.paksha.ml}</div>
-            <div>Sunrise: {getFormattedTime(selectedDateData.sunrise)}</div>
-            <div>Sunset: {getFormattedTime(selectedDateData.sunset)}</div>
-            <div>Is Pournami: {String(selectedDateData.is_pournami)}</div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            <div className="flex flex-col">
-              <p className="text-sm lg:text-md font-semibold">Thithi Transitions</p>
-              {
-                selectedDateData.thithi_transitions.map((thithi, index) => (
-                  <p key={`thithi-${index}`}>{thithi.thithi.ml} {thithi.thithi.paksha.ml} {getFormattedDateTime(thithi.start_time)} - {thithi.end_time ? getFormattedDateTime(thithi.end_time) : ""}</p>
-                ))
-              }
+              <div className="col-span-2 m-2">
+                <SunriseSunsetCard
+                  sunrise={selectedDateData.sunrise}
+                  sunset={selectedDateData.sunset}
+                />
+              </div>
+
+              {/*
+                <div className="col-span-1 m-2">
+                <MoonriseMoonsetCard
+                  moonrise={selectedDateData.sunrise}
+                  moonset={selectedDateData.sunset}
+                />
+              </div>
+              */}
+
+              <div className="col-span-2">
+                <ThithiTransitionCard
+                  transitions={selectedDateData.thithi_transitions}
+                  current_thithi={selectedDateData.thithi}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <NakshatraTransitionCard
+                  transitions={selectedDateData.nakshatra_transitions}
+                  current_nakshatra={selectedDateData.nakshatra}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <AshramSignificance
+                  significances={selectedDateData.santhigiri_significant_dates}
+                />
+              </div>
+
             </div>
-
-            <div className="flex flex-col">
-              <p className="text-sm lg:text-md font-semibold">Nakshatra Transitions</p>
-              {
-                selectedDateData.nakshatra_transitions.map((nakshatra, index) => (
-                  <p key={`nakshatra-${index}`}>{nakshatra.nakshatra.ml} {getFormattedDateTime(nakshatra.start_time)} - {nakshatra.end_time ? getFormattedDateTime(nakshatra.end_time) : ""}</p>
-                ))
-              }
+          )
+            :
+            <div className="md:col-span-1 flex items-center justify-center min-h-40 md:min-h-100">
+              <p className="text-center">
+                Select a date to display details here
+              </p>
             </div>
-            {
-              selectedDateData.santhigiri_significant_dates.length > 0 && (
-
-                <div className="flex flex-col">
-                  <p className="text-sm lg:text-md font-semibold">Santhigiri Significant Days</p>
-                  {
-                    selectedDateData.santhigiri_significant_dates.map((significance, index) => (
-                      <p key={`significance-${index}`}>{significance.name}</p>
-                    ))
-                  }
-                </div>
-              )
-            }
-          </div>
-        </div>
-      )}
+        }
+      </div>
     </div>
   )
 }

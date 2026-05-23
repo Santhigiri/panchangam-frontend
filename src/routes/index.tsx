@@ -5,8 +5,8 @@ export const Route = createFileRoute("/")({ component: App })
 
 function App() {
   return (
-    <div className="flex h-svh w-full p-6">
-      <div className="flex h-full w-full flex-1 gap-4">
+    <div className="flex min-h-screen w-full p-6 bg-[#F5F5DC]">
+      <div className="w-full flex-1 gap-4">
         <CalendarCustomDays />
       </div >
     </div >
