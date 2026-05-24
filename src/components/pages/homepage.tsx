@@ -298,7 +298,7 @@ export default function CalendarCustLomDays() {
           )
         }}
       />
-      <div className="md:col-span-1">
+      <div className="md:col-span-1 w-full">
         {
           selectedDateData ? (
             <div className="grid grid-col-2 justify-items-stretch">
