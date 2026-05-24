@@ -34,7 +34,7 @@ function getFormattedDateTime(datetime: string | null): string {
   if (datetime === null) return ""
 
   const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric', month: 'short', day: 'numeric',
+    month: 'short', day: 'numeric',
     hour: 'numeric', minute: 'numeric',
     hour12: true
   };
@@ -131,8 +131,8 @@ function NakshatraTransitionCard({ transitions, current_nakshatra }: NakshatraTr
       <div key={`thithi-transition-${idx}`} className={`flex flex-col ${transition.nakshatra.en === current_nakshatra.en ? `bg-green-100` : `bg-white`}  border-l-4 border-l-amber-900 rounded-md p-4 m-2`} >
         <div className="flex flex-row justify-between">
           <div className="flex flex-col">
-            <p className="font-semibold text-[12px] text-[#554336] ">NAKSHATRA</p>
-            <p className="font-medium text-2xl  font-playfair-display">{transition.nakshatra.en}</p>
+            <p className="font-semibold text-xs text-[#554336] ">NAKSHATRA</p>
+            <p className="font-medium text-base md:text-lg font-playfair-display">{transition.nakshatra.en}</p>
           </div>
           <div className="flex">
             <Star className="text-amber-200 h-10 w-10" />
@@ -140,9 +140,9 @@ function NakshatraTransitionCard({ transitions, current_nakshatra }: NakshatraTr
         </div>
 
         <hr className="divide-y-4 divide-gray-800"></hr>
-        <div className="flex flex-row gap-2 mt-2">
+        <div className="flex flex-row gap-2 mt-2 items-center">
           <Clock className="w-4 h-4" />
-          <p className="text-[12px] font-inter"> {getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
+          <p className="text-sm font-inter"> {getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
         </div>
       </div >
     ))
@@ -163,8 +163,8 @@ function ThithiTransitionCard({ transitions, current_thithi }: ThithiTransitionC
       <div key={`nakshatra-transition-${idx}`} className={`flex flex-col ${transition.thithi.en === current_thithi.en ? `bg-green-100` : `bg-white`}  border-l-4 border-l-amber-900 rounded-md p-4 m-2`} >
         <div className="flex flex-row justify-between">
           <div className="flex flex-col">
-            <p className="font-semibold text-[12px] text-[#554336] ">THITHI</p>
-            <p className="font-medium text-2xl font-playfair-display">{transition.thithi.en} ({transition.thithi.paksha.en})</p>
+            <p className="font-semibold text-xs text-[#554336] ">THITHI</p>
+            <p className="font-medium text-base md:text-lg font-playfair-display">{transition.thithi.en} ({transition.thithi.paksha.en})</p>
           </div>
           <div className="flex">
             <MoonIcon className="text-amber-200 h-10 w-10" />
@@ -172,9 +172,9 @@ function ThithiTransitionCard({ transitions, current_thithi }: ThithiTransitionC
         </div>
 
         <hr className="divide-y-4 divide-gray-800"></hr>
-        <div className="flex flex-row gap-2 mt-2">
+        <div className="flex flex-row items-center gap-2 mt-2">
           <Clock className="w-4 h-4" />
-          <p className="text-[12px] font-inter align-text-top">{getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
+          <p className="text-sm font-inter align-text-top">{getFormattedDateTime(transition.start_time)} - {getFormattedDateTime(transition.end_time)}</p>
         </div>
       </div >
     ))
@@ -195,10 +195,20 @@ function AshramSignificance({ significances }: AshramSignificanceProps) {
           <p className="text-amber-800 text-[12px] font-bold">ASHRAM SIGNIFICANCE</p>
         </div>
         <p className="font-playfair-display font-bold">{significance.name}</p>
-        <p className="font-inter text-[12px] font-light" >{significance.description}</p>
+        <p className="font-inter text-xs md:text-sm max-w-full font-light" >{significance.description}</p>
       </div>
     ))
   )
+}
+
+
+function dateToKey(dt: Date) {
+
+  return [
+    dt.getFullYear(),
+    String(dt.getMonth() + 1).padStart(2, "0"),
+    String(dt.getDate()).padStart(2, "0"),
+  ].join("-")
 }
 
 
@@ -207,7 +217,7 @@ export default function CalendarCustLomDays() {
   const [activeDate, setActiveDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const { data } = usePanchangam(activeDate)
+  const { data: monthData } = usePanchangam(activeDate)
 
   const selectedKey = [
     selectedDate.getFullYear(),
@@ -215,135 +225,176 @@ export default function CalendarCustLomDays() {
     String(selectedDate.getDate()).padStart(2, "0"),
   ].join("-")
 
-  const [minDate, maxDate] = useMemo(() => {
-    if (!data) return [null, null]
+  const [monthStartDate, monthEndDate] = useMemo(() => {
+    if (!monthData) return [null, null]
 
-    const keys = Object.keys(data).sort()
 
     return [
-      new Date(keys[0]),
-      new Date(keys[keys.length - 1])
+      new Date(activeDate.getFullYear(), activeDate.getMonth(), 1),
+      new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, 0)
     ]
-  }, [data])
+  }, [monthData])
 
-  const startKey = minDate
+  const startKey = monthStartDate
     ? [
-      minDate.getFullYear(),
-      String(minDate.getMonth() + 1).padStart(2, "0"),
-      String(minDate.getDate()).padStart(2, "0"),
+      monthStartDate.getFullYear(),
+      String(monthStartDate.getMonth() + 1).padStart(2, "0"),
+      String(monthStartDate.getDate()).padStart(2, "0"),
     ].join("-")
     : ""
 
-  const endKey = maxDate
+  const endKey = monthEndDate
     ? [
-      maxDate.getFullYear(),
-      String(maxDate.getMonth() + 1).padStart(2, "0"),
-      String(maxDate.getDate()).padStart(2, "0"),
+      monthEndDate.getFullYear(),
+      String(monthEndDate.getMonth() + 1).padStart(2, "0"),
+      String(monthEndDate.getDate()).padStart(2, "0"),
     ].join("-")
     : ""
 
 
   const selectedDateData = useMemo(() => {
-    if (!data) return null
-    return data[selectedKey as keyof typeof data]
-  }, [data, selectedKey])
+    if (!monthData) return null
+    return monthData[selectedKey as keyof typeof monthData]
+  }, [monthData, selectedKey])
+
+
+  const monthEvents = useMemo(() => {
+    if (!monthData) return []
+    const year = activeDate.getFullYear()
+    const month = activeDate.getMonth()
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const monthDates = []
+    for (let i = 1; i <= daysInMonth; i++) {
+      monthDates.push(new Date(year, month, i))
+    }
+    return monthDates.flatMap(dt => {
+      const key = dateToKey(dt)
+      const dayData = monthData[key]
+      if (!dayData) return null
+      return dayData.santhigiri_significant_dates.map(e => ({
+        dt,
+        key,
+        e
+      }))
+    })
+
+  }, [monthData, activeDate])
+
 
   return (
-    <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 items-center md:items-start">
-      <Calendar
-        formatDay={() => ""}
-        minDate={new Date(2021, 0, 1)}
-        maxDate={new Date(2030, 11, 31)}
-        calendarType="gregory"
-        activeStartDate={activeDate}
-        onClickDay={(day) => {
-          setSelectedDate(day)
-        }}
-        onActiveStartDateChange={({ activeStartDate }) => {
-          if (activeStartDate) {
-            setActiveDate(activeStartDate)
-          }
-        }}
-        className="w-full md:col-span-2"
-        navigationLabel={({ date, label, locale, view }) => {
-          if (!data) return label
-          if (view !== "month") return label
-          const start_ml_month = data[startKey as keyof typeof data]?.kv.kv_month_name_en ?? ""
-          const end_ml_month = data[endKey as keyof typeof data]?.kv.kv_month_name_en ?? ""
+    <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-2 items-center md:items-start">
+      <div className="md:col-span-2">
+        <Calendar
+          formatDay={() => ""}
+          minDate={new Date(2021, 0, 1)}
+          maxDate={new Date(2030, 11, 31)}
+          calendarType="gregory"
+          activeStartDate={activeDate}
+          onClickDay={(day) => {
+            setSelectedDate(day)
+          }}
+          onActiveStartDateChange={({ activeStartDate }) => {
+            if (activeStartDate) {
+              setActiveDate(activeStartDate)
+            }
+          }}
+          className="w-full"
+          navigationLabel={({ date, label, locale, view }) => {
+            if (!monthData) return label
+            if (view !== "month") return label
+            const start_ml_month = monthData[startKey as keyof typeof monthData]?.kv.kv_month_name_ml ?? ""
+            const end_ml_month = monthData[endKey as keyof typeof monthData]?.kv.kv_month_name_ml ?? ""
 
-          const ml_month = `${start_ml_month} / ${end_ml_month}`
-          return (
-            <div className="flex flex-col items-center leading-tight">
-              <span className="text-lg font-bold text-amber-800">
-                {label}
-              </span>
-              <span className="text-xs text-gray-500 font-medium">
-                {ml_month}
-              </span>
-            </div>
-          )
-        }}
-        tileClassName={() => "custom-tile"}
-        tileContent={({ date, view }) => {
-          if (view !== "month") return null
-          if (!data) return null
+            const ml_month = `${start_ml_month} / ${end_ml_month}`
+            return (
+              <div className="flex flex-col items-center leading-tight">
+                <span className="text-lg font-bold text-amber-800">
+                  {label}
+                </span>
+                <span className="text-xs text-gray-500 font-medium">
+                  {ml_month}
+                </span>
+              </div>
+            )
+          }}
+          tileClassName={() => "custom-tile"}
+          tileContent={({ date, view }) => {
+            if (view !== "month") return null
+            if (!monthData) return null
 
-          const key = [
-            date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, "0"),
-            String(date.getDate()).padStart(2, "0"),
-          ].join("-")
+            const key = [
+              date.getFullYear(),
+              String(date.getMonth() + 1).padStart(2, "0"),
+              String(date.getDate()).padStart(2, "0"),
+            ].join("-")
 
-          const dateData = data[key as keyof typeof data]
+            const dateData = monthData[key as keyof typeof monthData]
 
-          if (!dateData) return null
+            if (!dateData) return null
 
-          const isNeighbouringMonth =
-            date.getMonth() !== activeDate.getMonth()
+            const isNeighbouringMonth =
+              date.getMonth() !== activeDate.getMonth()
 
-          const neighbouringMonthStyle =
-            isNeighbouringMonth ? "opacity-40" : ""
+            const neighbouringMonthStyle =
+              isNeighbouringMonth ? "opacity-40" : ""
 
-          return (
-            <div className="flex h-full w-full flex-col">
-              {
-                dateData.kv.kv_day === 1 ? (
-                  <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50">
-                    {dateData.kv.kv_month_name_ml}
+            return (
+              <div className="flex h-full w-full flex-col">
+                {
+                  dateData.kv.kv_day === 1 ? (
+                    <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50">
+                      {dateData.kv.kv_month_name_ml}
+                    </p>
+                  ) :
+                    <p className="text-[10px] lg:text-[12px]  text-transparent">
+                      {dateData.kv.kv_month_name_ml}
+                    </p>
+                }
+                <div className="relative h-full w-full">
+                  <p className={`text-[12px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
+                    {date.getDate()}
                   </p>
-                ) :
-                  <p className="text-[10px] lg:text-[12px]  text-transparent">
-                    {dateData.kv.kv_month_name_ml}
-                  </p>
-              }
-              <div className="relative h-full w-full">
-                <p className={`text-[12px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
-                  {date.getDate()}
-                </p>
-                <div className="absolute top-0 right-0">
-                  {dateData.is_pournami && (
-                    <img
-                      src="/moon.png"
-                      alt="full-moon"
-                      className="w-5 h-5"
-                    />
-                  )}
-                </div>
-                <div className="flex flex-col lg:flex-row items-center lg:items-end justify-end lg:justify-between w-full p-2">
-                  <p className={`text-[10px] lg:text-[12px] ${neighbouringMonthStyle} text-blue-600`}>
-                    {dateData.kv.kv_day}
-                  </p>
-                  <div className="flex-col">
-                    <div className={`text-center text-[10px] lg:text-[12px] leading-none ${neighbouringMonthStyle}`}>
-                      {dateData.nakshatra.ml}
+                  <div className="absolute top-0 right-0">
+                    {dateData.is_pournami && (
+                      <img
+                        src="/moon.png"
+                        alt="full-moon"
+                        className="w-4 h-4 md:w-5 md:h-5"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col lg:flex-row items-center lg:items-end justify-end lg:justify-between w-full p-2">
+                    <p className={`text-[10px] lg:text-[12px] ${neighbouringMonthStyle} text-blue-600`}>
+                      {dateData.kv.kv_day}
+                    </p>
+                    <div className="flex-col">
+                      <div className={`text-center text-[10px] lg:text-[12px] truncate leading-none ${neighbouringMonthStyle}`}>
+                        {dateData.nakshatra.ml}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )
-        }}
-      />
+            )
+          }}
+        />
+        <div className="grid grid-flow-rows auto-rows-min my-2">
+          {
+            monthEvents.map(event => {
+              if (!event) return null
+              return (
+                <div className="flex text-amber-800 font-semibold font-inter text-xs md:text-sm flex-row gap4">
+                  <p className="mx-2">{event.dt.getDate()}</p>
+                  <p>{event.e.name}</p>
+                </div>
+              )
+
+            })
+          }
+        </div>
+
+      </div>
       <div className="md:col-span-1 w-full">
         {
           selectedDateData ? (
