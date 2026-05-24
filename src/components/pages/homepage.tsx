@@ -217,7 +217,7 @@ export default function CalendarCustLomDays() {
   const [activeDate, setActiveDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const { data: monthData } = usePanchangam(activeDate)
+  const { data: monthData, isLoading } = usePanchangam(activeDate)
 
   const selectedKey = [
     selectedDate.getFullYear(),
@@ -280,6 +280,14 @@ export default function CalendarCustLomDays() {
     })
 
   }, [monthData, activeDate])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-8 h-8 border-4 border-amber-700 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
 
   return (
