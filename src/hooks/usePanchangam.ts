@@ -12,6 +12,8 @@ export function usePanchangam(date: Date) {
     queryFn: () => {
       return getPanchangam(year, month)
     },
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours
+    staleTime: 1000 * 60 * 60, // 1 hour (fresh for 1h)
     placeholderData: (previousData) => previousData,
   })
 
