@@ -355,7 +355,7 @@ export default function CalendarCustLomDays() {
                       {dateData.kv.kv_month_name_ml}
                     </p>
                   ) :
-                    <p className="text-[10px] lg:text-[12px]  text-transparent">
+                    <p className="text-[10px] lg:text-[12px] text-transparent">
                       {dateData.kv.kv_month_name_ml}
                     </p>
                 }
@@ -372,12 +372,12 @@ export default function CalendarCustLomDays() {
                       />
                     )}
                   </div>
-                  <div className="flex flex-col lg:flex-row items-center lg:items-end justify-end lg:justify-between w-full p-2">
-                    <p className={`text-[10px] lg:text-[12px] ${neighbouringMonthStyle} text-blue-600`}>
+                  <div className="flex flex-col lg:flex-row items-center lg:items-center justify-end lg:justify-between w-full p-2">
+                    <p className={`text-[10px] lg:text-[14px] ${neighbouringMonthStyle} text-blue-600`}>
                       {dateData.kv.kv_day}
                     </p>
                     <div className="flex-col">
-                      <div className={`text-center text-[10px] lg:text-[12px] truncate leading-none ${neighbouringMonthStyle}`}>
+                      <div className={`text-center text-[10px] lg:text-[14px] leading-none ${neighbouringMonthStyle}`}>
                         {dateData.nakshatra.ml}
                       </div>
                     </div>
@@ -456,6 +456,9 @@ export default function CalendarCustLomDays() {
             <div className="md:col-span-1 flex items-center justify-center min-h-40 md:min-h-100">
               <p className="text-center">
                 Select a date to display details here
+                test
+                test
+                test
               </p>
             </div>
         }

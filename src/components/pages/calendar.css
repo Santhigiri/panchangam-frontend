@@ -171,6 +171,11 @@
   background: #006edc;
 }
 
+/* Remove top border from all rows except first */
+.react-calendar__month-view__days__day:nth-child(n + 8) {
+  border-top: none;
+}
+
 /* bottom-left tile */
 .react-calendar__month-view__days__day:nth-last-child(7) {
   border-bottom-left-radius: 18px;
