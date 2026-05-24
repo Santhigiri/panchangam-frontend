@@ -52,9 +52,16 @@
   min-width: 44px;
   background: none;
 }
+.react-calendar__navigation__prev2-button {
+  border-radius: 18px 0 0 0;
+}
+.react-calendar__navigation__next2-button {
+  border-radius: 0 18px 0 0;
+}
 
 .react-calendar__navigation button:disabled {
   background-color: #f0f0f0;
+  color: #ababab;
 }
 
 .react-calendar__navigation button:enabled:hover,

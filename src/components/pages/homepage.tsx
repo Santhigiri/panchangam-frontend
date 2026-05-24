@@ -215,6 +215,34 @@ export default function CalendarCustLomDays() {
     String(selectedDate.getDate()).padStart(2, "0"),
   ].join("-")
 
+  const [minDate, maxDate] = useMemo(() => {
+    if (!data) return [null, null]
+
+    const keys = Object.keys(data).sort()
+
+    return [
+      new Date(keys[0]),
+      new Date(keys[keys.length - 1])
+    ]
+  }, [data])
+
+  const startKey = minDate
+    ? [
+      minDate.getFullYear(),
+      String(minDate.getMonth() + 1).padStart(2, "0"),
+      String(minDate.getDate()).padStart(2, "0"),
+    ].join("-")
+    : ""
+
+  const endKey = maxDate
+    ? [
+      maxDate.getFullYear(),
+      String(maxDate.getMonth() + 1).padStart(2, "0"),
+      String(maxDate.getDate()).padStart(2, "0"),
+    ].join("-")
+    : ""
+
+
   const selectedDateData = useMemo(() => {
     if (!data) return null
     return data[selectedKey as keyof typeof data]
@@ -224,7 +252,7 @@ export default function CalendarCustLomDays() {
     <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 items-center md:items-start">
       <Calendar
         formatDay={() => ""}
-        minDate={new Date(2020, 0, 1)}
+        minDate={new Date(2021, 0, 1)}
         maxDate={new Date(2030, 11, 31)}
         calendarType="gregory"
         activeStartDate={activeDate}
@@ -237,6 +265,24 @@ export default function CalendarCustLomDays() {
           }
         }}
         className="w-full md:col-span-2"
+        navigationLabel={({ date, label, locale, view }) => {
+          if (!data) return label
+          if (view !== "month") return label
+          const start_ml_month = data[startKey as keyof typeof data]?.kv.kv_month_name_en ?? ""
+          const end_ml_month = data[endKey as keyof typeof data]?.kv.kv_month_name_en ?? ""
+
+          const ml_month = `${start_ml_month} / ${end_ml_month}`
+          return (
+            <div className="flex flex-col items-center leading-tight">
+              <span className="text-lg font-bold text-amber-800">
+                {label}
+              </span>
+              <span className="text-xs text-gray-500 font-medium">
+                {ml_month}
+              </span>
+            </div>
+          )
+        }}
         tileClassName={() => "custom-tile"}
         tileContent={({ date, view }) => {
           if (view !== "month") return null
