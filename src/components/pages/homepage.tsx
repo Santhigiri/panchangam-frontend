@@ -2,7 +2,7 @@ import { Calendar } from "react-calendar"
 import "./calendar.css"
 import { useMemo, useState, type ReactNode } from "react"
 import { usePanchangam } from "@/hooks/usePanchangam"
-import { Clock, Landmark, MoonIcon, Star, SunIcon, SunriseIcon, SunsetIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Landmark, MoonIcon, Star, SunIcon, SunriseIcon, SunsetIcon } from "lucide-react";
 import type { ISODatetime, KollavarshamDate, Nakshatra, NakshatraTransition, SanthigiriSignificance, Thithi, ThithiTransition } from "@/api/schemas/panchangamData";
 
 
@@ -297,6 +297,14 @@ export default function CalendarCustLomDays() {
           formatDay={() => ""}
           minDate={new Date(2021, 0, 1)}
           maxDate={new Date(2030, 11, 31)}
+          prev2Label={null}
+          next2Label={null}
+          prevLabel={
+            <ChevronLeft className="w-8 h-8 mx-8" />
+          }
+          nextLabel={
+            <ChevronRight className="h-8 w-8 mx-8" />
+          }
           calendarType="gregory"
           activeStartDate={activeDate}
           onClickDay={(day) => {
