@@ -368,7 +368,7 @@ export default function CalendarCustLomDays() {
                     </p>
                 }
                 <div className="relative h-full w-full">
-                  <p className={`text-[14px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
+                  <p className={`text-[14px] lg:text-2xl w-full text-center ${neighbouringMonthStyle} font-bold`}>
                     {date.getDate()}
                   </p>
                   <div className="flex flex-col lg:flex-row items-center lg:items-center justify-end lg:justify-between w-full p-2">
