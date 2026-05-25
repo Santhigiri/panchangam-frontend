@@ -23,6 +23,36 @@
   margin: 0.5em;
 }
 
+.bg-moon {
+  position: relative; /* Required for pseudo-element positioning */
+}
+
+.bg-moon::before {
+  content: '';
+  position: absolute;
+  inset: 0; /* Covers entire tile */
+  background-image: url('/moon.png');
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.7; /* ✅ Adjust opacity here (0.0 to 1.0) */
+  pointer-events: none; /* Allows clicks to pass through */
+  z-index: 0;
+}
+
+/* Ensure tile content appears above the background */
+.bg-moon > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile (< md = 768px) */
+@media (max-width: 767px) {
+  .bg-moon::before {
+    background-size: 80%; /* ✅ Wider on small screens */
+  }
+}
+
 .react-calendar,
 .react-calendar *,
 .react-calendar *:before,

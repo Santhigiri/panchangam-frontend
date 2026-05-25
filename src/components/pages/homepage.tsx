@@ -356,7 +356,7 @@ export default function CalendarCustLomDays() {
               isNeighbouringMonth ? "opacity-40" : ""
 
             return (
-              <div className="flex h-full w-full flex-col">
+              <div className={`flex h-full w-full flex-col  ${dateData.is_pournami ? "bg-moon" : ""}`}>
                 {
                   dateData.kv.kv_day === 1 ? (
                     <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50">
@@ -368,18 +368,9 @@ export default function CalendarCustLomDays() {
                     </p>
                 }
                 <div className="relative h-full w-full">
-                  <p className={`text-[12px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
+                  <p className={`text-[14px] lg:text-2xl w-full text-center ${neighbouringMonthStyle}`}>
                     {date.getDate()}
                   </p>
-                  <div className="absolute top-0 right-0">
-                    {dateData.is_pournami && (
-                      <img
-                        src="/moon.png"
-                        alt="full-moon"
-                        className="w-4 h-4 md:w-5 md:h-5"
-                      />
-                    )}
-                  </div>
                   <div className="flex flex-col lg:flex-row items-center lg:items-center justify-end lg:justify-between w-full p-2">
                     <p className={`text-[10px] lg:text-[14px] ${neighbouringMonthStyle} text-blue-600`}>
                       {dateData.kv.kv_day}
