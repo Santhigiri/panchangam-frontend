@@ -367,7 +367,7 @@ export default function CalendarCustLomDays() {
                       {dateData.kv.kv_month_name_ml}
                     </p>
                 }
-                <div className="relative h-full w-full">
+                <div className="h-full w-full">
                   <p className={`text-[14px] lg:text-2xl w-full text-center ${neighbouringMonthStyle} font-bold`}>
                     {date.getDate()}
                   </p>
@@ -455,9 +455,6 @@ export default function CalendarCustLomDays() {
             <div className="md:col-span-1 flex items-center justify-center min-h-40 md:min-h-100">
               <p className="text-center">
                 Select a date to display details here
-                test
-                test
-                test
               </p>
             </div>
         }

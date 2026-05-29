@@ -17,8 +17,9 @@ const config = defineConfig({
     tailwindcss(),
     viteReact(),
     VitePWA({
-      registerType: "autoUpdate",
-
+      workbox: {
+        sourcemap: true
+      },
       includeAssets: [
         "favicon.ico",
         "apple-touch-icon.png",
@@ -49,7 +50,8 @@ const config = defineConfig({
       },
 
       devOptions: {
-        enabled: true
+        enabled: true,
+        type: 'module',
       }
     })
   ],
