@@ -19,7 +19,16 @@ export const RefreshPrompt = () => {
 
   const reloadPage = () => {
     setNeedRefresh(false);
-    updateServiceWorker(true); // skipWaiting + reload
+    if ('caches' in window) {
+      caches.keys().then((cacheNames) => {
+        cacheNames.forEach((cacheName) => {
+          if (cacheName.startsWith('workbox-') || cacheName.startsWith('cache-')) {
+            caches.delete(cacheName);
+          }
+        });
+        updateServiceWorker(true); // Skip waiting + reload
+      });
+    }
   };
 
   if (!needRefresh) return null;
