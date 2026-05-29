@@ -7,25 +7,29 @@ export const RefreshPrompt = () => {
   } = useRegisterSW({
     onNeedRefresh() {
       setNeedRefresh(true);
+      console.log("Refresh needed!");
     },
     onOfflineReady() {
       console.log('Offline-ready');
+    },
+    onRegisterError(error) {
+      console.error('SW registration error:', error);
     },
   });
 
   const reloadPage = () => {
     setNeedRefresh(false);
-    updateServiceWorker(true); // Handles skipWaiting + reload
+    updateServiceWorker(true); // skipWaiting + reload
   };
 
   if (!needRefresh) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border">
+    <div className="fixed bottom-4 right-4 bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
       <p className="text-sm text-gray-700">New update available!</p>
       <button
         onClick={reloadPage}
-        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="mt-2 p-2 text-[#E4E4CC] text-xs bg-[#8F4E00] rounded hover:opacity-70"
       >
         Refresh
       </button>

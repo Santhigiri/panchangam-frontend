@@ -17,8 +17,17 @@ const config = defineConfig({
     tailwindcss(),
     viteReact(),
     VitePWA({
+      devOptions: {
+        enabled: true,
+        type: 'classic',
+        navigateFallback: 'index.html'
+      },
+      strategies: 'generateSW',
       workbox: {
-        sourcemap: true
+        sourcemap: true,
+        runtimeCaching: [],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globDirectory: 'dist'
       },
       includeAssets: [
         "favicon.ico",
@@ -47,12 +56,8 @@ const config = defineConfig({
             purpose: "any maskable"
           }
         ]
-      },
-
-      devOptions: {
-        enabled: true,
-        type: 'module',
       }
+
     })
   ],
 })
