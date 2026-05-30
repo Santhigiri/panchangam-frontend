@@ -10,8 +10,8 @@ export default function TopAppBar(
   { title, showSidbar = false, actions }: AppBarProps
 ) {
   return (
-    <div className="md:hidden flex flex-row">
-      <p className="text-primary-foreground font-inter">{title}</p>
+    <div className="md:hidden flex flex-row w-full items-end">
+      <p className="text-primary ml-8 flex-1 text-center text-xl font-semibold font-playfair-display">{title}</p>
       {actions}
 
 

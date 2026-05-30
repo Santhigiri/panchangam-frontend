@@ -8,7 +8,6 @@ export async function getPanchangam(
   latitude: number = 8.6318,
   longitude: number = 76.897) {
 
-  console.log(`APP_BASE_URL: ${APP_BASE_URL}`)
 
   const response = await fetch(
     `${APP_BASE_URL}/panchangam/monthly?year=${year}&month=${month}&latitude=${latitude}&longitude=${longitude}`
@@ -29,7 +28,6 @@ export async function getPanchangam(
 
   try {
     const data = await monthlyPanchangamData.parseAsync(json)
-    console.log(data)
     return data
 
   } catch (e) {

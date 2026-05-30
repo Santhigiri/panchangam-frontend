@@ -1,0 +1,25 @@
+.react-datepicker {
+  background: #F5F5DC;
+}
+
+.react-datepicker__header {
+  background: #F5F5DC;
+}
+
+.react-datepicker__day {
+  background: none;
+  color: hsl(var(--color-primary));
+}
+
+.react-datepicker__day--today{
+  color: white;
+  background: green;
+}
+.react-datepicker__day--selected{
+  color: white;
+  background: blue;
+}
+.react-datepicker__day--keyboard-selected{
+  color: white;
+  background: blue;
+}

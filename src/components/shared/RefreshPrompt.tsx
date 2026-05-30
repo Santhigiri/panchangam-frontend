@@ -7,10 +7,8 @@ export const RefreshPrompt = () => {
   } = useRegisterSW({
     onNeedRefresh() {
       setNeedRefresh(true);
-      console.log("Refresh needed!");
     },
     onOfflineReady() {
-      console.log('Offline-ready');
     },
     onRegisterError(error) {
       console.error('SW registration error:', error);
@@ -34,7 +32,7 @@ export const RefreshPrompt = () => {
   if (!needRefresh) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
+    <div className="fixed bottom-10 right-4 bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
       <p className="text-sm text-gray-700">New update available!</p>
       <button
         onClick={reloadPage}
