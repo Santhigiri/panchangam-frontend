@@ -1,25 +1,25 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { HeadContent, Scripts, createRootRoute, Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import appCss from "../styles.css?url"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { queryClient } from "@/lib/query-client"
-import { RefreshPrompt } from "@/components/pages/RefreshPrompt"
+import { RefreshPrompt } from "@/components/shared/RefreshPrompt"
+import Sidebar from "@/components/shared/Sidebar"
 
 export const Route = createRootRoute({
   head: () => ({
-    meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: "Pournami Calendar",
-      },
+    meta: [{
+      charSet: "utf-8",
+    },
+    {
+      name: "viewport",
+      content: "width=device-width, initial-scale=1",
+    },
+    {
+      title: "Pournami Calendar",
+    },
     ],
     links: [
       {
@@ -35,6 +35,7 @@ export const Route = createRootRoute({
     </main>
   ),
   shellComponent: RootDocument,
+  component: RootLayout, // <-- Add this
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -44,7 +45,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-
         <QueryClientProvider client={queryClient}>
           {children}
           <RefreshPrompt />
@@ -63,5 +63,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  )
+}
+
+// <-- Add this component
+function RootLayout() {
+  return (
+    <div className="flex flex-col-reverse md:flex-row min-h-screen w-full bg-[#F5F5DC]">
+      <Sidebar />
+      <main className="flex-1 overflow-auto p-2 md:ml-16">
+        <Outlet /> {/* Child routes render here */}
+      </main>
+    </div>
   )
 }

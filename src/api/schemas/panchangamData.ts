@@ -83,4 +83,6 @@ export const panchangamData = z.object({
   santhigiri_significant_dates: z.array(santhigiri_significance)
 })
 
+export type PanchangamDayData = z.infer<typeof panchangamData>
+
 export const monthlyPanchangamData = z.record(z.string(), panchangamData)
