@@ -1,0 +1,191 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\Budget\Service\BankSync;
+
+use OCP\Http\Client\IClientService;
+use Psr\Log\LoggerInterface;
+
+/**
+ * SimpleFIN Bridge provider for US bank integration.
+ *
+ * Authentication flow:
+ * 1. User gets a setup token from https://beta-bridge.simplefin.org
+ * 2. App base64-decodes the token to get a claim URL
+ * 3. App POSTs to the claim URL to get an Access URL (with embedded Basic Auth)
+ * 4. Access URL is stored encrypted and used for all subsequent requests
+ *
+ * Rate limit: 24 requests/day per connection.
+ */
+class SimpleFINProvider implements BankSyncProviderInterface {
+    public function __construct(
+        private IClientService $clientService,
+        private LoggerInterface $logger
+    ) {
+    }
+
+    public function getIdentifier(): string {
+        return 'simplefin';
+    }
+
+    public function getDisplayName(): string {
+        return 'SimpleFIN Bridge';
+    }
+
+    public function initializeConnection(array $params): array {
+        $setupToken = $params['setupToken'] ?? null;
+        if (!$setupToken) {
+            throw new \InvalidArgumentException('Setup token is required');
+        }
+
+        // Decode the setup token to get the claim URL
+        $claimUrl = base64_decode($setupToken, true);
+        if ($claimUrl === false || !filter_var($claimUrl, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid setup token');
+        }
+
+        // Claim the token to get the access URL
+        $client = $this->clientService->newClient();
+        try {
+            $response = $client->post($claimUrl, ['timeout' => 30]);
+            $accessUrl = $response->getBody();
+
+            if (empty($accessUrl) || !filter_var($accessUrl, FILTER_VALIDATE_URL)) {
+                throw new \Exception('Invalid access URL received from SimpleFIN');
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('SimpleFIN token claim failed: ' . $e->getMessage(), ['app' => 'budget']);
+            throw new \Exception('Failed to claim SimpleFIN token: ' . $this->describeHttpFailure($e)
+                . ' Note: setup tokens are single-use — generate a fresh token for each attempt.');
+        }
+
+        // Fetch initial accounts to verify the connection works
+        $accountData = $this->fetchAccounts($accessUrl);
+
+        return [
+            'credentials' => $accessUrl,
+            'accounts' => $accountData['accounts'],
+        ];
+    }
+
+    public function fetchAccounts(string $credentials, array $options = []): array {
+        $accessUrl = $credentials;
+
+        // Parse the access URL to extract Basic Auth credentials
+        $parsed = parse_url($accessUrl);
+        if (!$parsed || empty($parsed['user'])) {
+            throw new \Exception('Invalid SimpleFIN access URL');
+        }
+
+        $baseUrl = sprintf('%s://%s%s',
+            $parsed['scheme'],
+            $parsed['host'] . (isset($parsed['port']) ? ':' . $parsed['port'] : ''),
+            rtrim($parsed['path'] ?? '', '/')
+        );
+        $username = $parsed['user'];
+        $password = $parsed['pass'] ?? '';
+
+        $client = $this->clientService->newClient();
+        try {
+            // Request transactions from the last 90 days.
+            // Without start-date, some providers (especially credit cards)
+            // return zero transactions.
+            $startDate = (new \DateTime('-90 days'))->getTimestamp();
+            $url = $baseUrl . '/accounts?start-date=' . $startDate;
+            // SimpleFIN returns only posted transactions unless pending=1 is set.
+            if (!empty($options['includePending'])) {
+                $url .= '&pending=1';
+            }
+            $response = $client->get($url, [
+                'auth' => [$username, $password],
+                'timeout' => 30,
+            ]);
+            $data = json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            $this->logger->error('SimpleFIN fetch failed: ' . $e->getMessage(), ['app' => 'budget']);
+            throw new \Exception('Failed to fetch accounts from SimpleFIN: ' . $this->describeHttpFailure($e));
+        }
+
+        if (!is_array($data) || !isset($data['accounts'])) {
+            throw new \Exception('Unexpected response format from SimpleFIN');
+        }
+
+        $this->logger->info('SimpleFIN returned ' . count($data['accounts']) . ' accounts (start-date: ' . date('Y-m-d', $startDate) . ')', ['app' => 'budget']);
+
+        // Normalize to common format
+        $accounts = [];
+        foreach ($data['accounts'] as $account) {
+            $accountId = $account['id'] ?? '';
+            $rawTxCount = count($account['transactions'] ?? []);
+            $transactions = [];
+            foreach ($account['transactions'] ?? [] as $idx => $tx) {
+                $amount = (string) ($tx['amount'] ?? '0');
+                // Use posted timestamp, but fall back to transacted_at or today for pending (posted=0)
+                $posted = (int) ($tx['posted'] ?? 0);
+                if ($posted > 0) {
+                    $date = date('Y-m-d', $posted);
+                } elseif (!empty($tx['transacted_at'])) {
+                    $date = date('Y-m-d', (int) $tx['transacted_at']);
+                } else {
+                    $date = date('Y-m-d');
+                }
+                $transactions[] = [
+                    'id' => $tx['id'] ?? hash('sha256', $accountId . ':' . $idx . ':' . ($tx['posted'] ?? '') . ':' . $amount . ':' . ($tx['description'] ?? '')),
+                    'date' => $date,
+                    'amount' => $amount,
+                    'description' => $tx['description'] ?? '',
+                    'vendor' => null,
+                    'pending' => !empty($tx['pending']) || $posted === 0,
+                ];
+            }
+
+            $accountName = $account['name'] ?? 'Unknown Account';
+            $this->logger->info("SimpleFIN account '{$accountName}': {$rawTxCount} raw transactions, " . count($transactions) . " parsed", ['app' => 'budget']);
+
+            $accounts[] = [
+                'id' => $account['id'] ?? '',
+                'name' => $account['name'] ?? 'Unknown Account',
+                'currency' => strtoupper($account['currency'] ?? 'USD'),
+                'balance' => (string) ($account['balance'] ?? '0'),
+                'transactions' => $transactions,
+            ];
+        }
+
+        return ['accounts' => $accounts];
+    }
+
+    public function fetchAccountList(string $credentials, array $options = []): array {
+        // SimpleFIN doesn't have a separate metadata endpoint
+        return $this->fetchAccounts($credentials, $options);
+    }
+
+    /**
+     * Turn an HTTP client exception into a short, user-actionable description.
+     * The bridge's status code is the diagnostic (e.g. 402/403 = account or
+     * subscription problem on the SimpleFIN side) — hiding it behind a generic
+     * message made these reports impossible to self-diagnose (#277).
+     */
+    private function describeHttpFailure(\Exception $e): string {
+        if (preg_match('/resulted in a `(\d{3})[^`]*`/', $e->getMessage(), $m)) {
+            $status = (int) $m[1];
+            $hint = match (true) {
+                $status === 402, $status === 403 => ' Check on the SimpleFIN Bridge website that your subscription is active and the token has not been revoked.',
+                $status === 401 => ' The access credentials were rejected — reconnect with a fresh setup token.',
+                $status >= 500 => ' The SimpleFIN service appears to be having problems — try again later.',
+                default => '',
+            };
+            return "SimpleFIN returned HTTP {$status}.{$hint}";
+        }
+        return 'Could not reach the SimpleFIN service.';
+    }
+
+    public function requiresReauthorization(string $credentials): bool {
+        // SimpleFIN access URLs are long-lived until revoked by the user
+        return false;
+    }
+
+    public function revokeConnection(string $credentials): void {
+        // SimpleFIN has no revocation API — user revokes at simplefin.org
+    }
+}

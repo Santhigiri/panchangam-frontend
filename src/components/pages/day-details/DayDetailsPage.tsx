@@ -1,6 +1,6 @@
 import useDayDetails from "@/hooks/useDayDetails";
 import { addDays, format } from "date-fns";
-import { CalendarIcon, ChevronDownIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarIcon, ChevronDownIcon, ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon } from "lucide-react";
 import DateHeader from "../calendar/DateHeader";
 import SunriseSunsetCard from "../calendar/SunriseSunsetCard";
 import ThithiTransitionCard from "../calendar/ThithiTransitionCard";
@@ -22,7 +22,7 @@ export default function DayDetailsPage() {
     activeDateData,
   } = useDayDetails();
 
-  function getTomorrowData() {  // Fixed typo: getTommorowData → getTomorrowData
+  function getTomorrowData() {
     setActiveDate(addDays(activeDate, 1));
   }
 
@@ -31,33 +31,38 @@ export default function DayDetailsPage() {
   }
 
   const [datePickerOpen, setDatePickerOpen] = useState(false)
-  console.log(`datePickerOpen: ${datePickerOpen}`)
 
+  console.log(`datePickerOpen: ${datePickerOpen}`)
   return (
     <div className="flex flex-col items-stretch">
       <TopAppBar
         title="Daily Panchangam"
         actions={
           <>
-            <CalendarIcon onClick={() => setDatePickerOpen(!datePickerOpen)} >Select a date</CalendarIcon>
-            <DatePicker
-              startDate={CALENDAR_START_DATE}
-              endDate={CALENDAR_END_DATE}
-              open={datePickerOpen}
-              onClickOutside={
-                () =>
-                  setDatePickerOpen(false)
-              }
-              className="hidden"
-              popperPlacement="top-end"
-              onSelect={
-                (date) => {
-                  if (date) {
-                    setDatePickerOpen(false)
-                    setActiveDate(date)
-                  }
-                }
-              } />
+            <CalendarIcon onClick={() => {
+              setDatePickerOpen(prev => !prev)
+            }} />
+            {
+              datePickerOpen && (
+                <DatePicker
+                  selected={activeDate}
+                  minDate={new Date(CALENDAR_START_DATE)}
+                  maxDate={new Date(CALENDAR_END_DATE)}
+                  open={datePickerOpen}
+                  customInput={<div />}
+                  disabledKeyboardNavigation={true}
+                  popperPlacement="top-end"
+                  onSelect={
+                    (date) => {
+                      if (date) {
+                        setDatePickerOpen(false)
+                        console.log(date)
+                        setActiveDate(date)
+                      }
+                    }
+                  } />
+              )
+            }
           </>
         }
       />

@@ -74,7 +74,6 @@ export const panchangamData = z.object({
   kv: kollavarsham,
   nakshatra: nakshatra,
   thithi: thithi,
-  is_pournami: z.boolean(),
   thithi_transitions: z.array(thithi_transition),
   nakshatra_transitions: z.array(nakshatra_transition),
   sunrise: isoDatetime,

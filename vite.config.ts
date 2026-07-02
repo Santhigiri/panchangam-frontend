@@ -25,8 +25,13 @@ const config = defineConfig({
       strategies: 'generateSW',
       workbox: {
         sourcemap: true,
-        runtimeCaching: [],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/$/,  // Matches all HTML navigation requests
+            handler: 'NetworkOnly',  // Never caches HTML, always fetches from network
+          },
+        ],
+        globPatterns: ['**/*.{js,css,ico,png,svg}'],
         globDirectory: 'dist'
       },
       includeAssets: [

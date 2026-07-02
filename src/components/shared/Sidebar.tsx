@@ -15,7 +15,6 @@ const navItems: NavItemProps[] = [
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const router = useRouterState();
 
   return (
     <>
@@ -38,7 +37,6 @@ export default function Sidebar() {
 
         <nav className="mt-4">
           {navItems.map(({ to, icon: Icon, label }) => {
-            const isActive = router.location.pathname === to;
             return (
               <Link
                 key={to}

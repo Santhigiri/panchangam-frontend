@@ -2,11 +2,16 @@ import { useMemo, useState } from "react";
 import { usePanchangam } from "@/hooks/usePanchangam";
 
 export function dateToKey(dt: Date) {
-  return [
+  console.log(`parsing date: ${dt}`)
+  const dateString = [
     dt.getFullYear(),
     String(dt.getMonth() + 1).padStart(2, "0"),
     String(dt.getDate()).padStart(2, "0"),
   ].join("-");
+
+
+  console.log(`parsed string: ${dateString}`)
+  return dateString
 }
 
 export function useCalendarPanchangam(initialActiveDate = new Date(), initialSelectedDate = new Date()) {

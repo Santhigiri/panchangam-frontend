@@ -1,0 +1,447 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\Budget\Service\Import;
+
+/**
+ * Normalizes transaction data from various import formats.
+ */
+class TransactionNormalizer {
+    /**
+     * Date formats to try when parsing dates.
+     */
+    private const DATE_FORMATS = [
+        'Y-m-d',
+        'm/d/Y',
+        'd/m/Y',
+        'm-d-Y',
+        'd-m-Y',
+        'Y/m/d',
+        'd.m.Y',
+        'm.d.Y',
+        // 2-digit year variants (must come AFTER 4-digit to avoid
+        // misinterpreting e.g. "25.03.2026" by consuming only "20")
+        'm/d/y',
+        'd/m/y',
+        'd.m.y',
+    ];
+
+    /** @var string|null Cached date format detected from batch analysis */
+    private ?string $detectedDateFormat = null;
+
+    /**
+     * Map a CSV row to a transaction using the provided column mapping.
+     *
+     * @param array $row The CSV row data
+     * @param array $mapping Field to column mapping
+     * @return array Normalized transaction data
+     */
+    public function mapRowToTransaction(array $row, array $mapping): array {
+        $transaction = [];
+
+        foreach ($mapping as $field => $column) {
+            // Skip non-column mapping fields (boolean config flags)
+            if (is_bool($column) || $column === null || $column === '') {
+                continue;
+            }
+
+            if (isset($row[$column])) {
+                $transaction[$field] = $row[$column];
+            }
+        }
+
+        // Ensure required fields
+        if (empty($transaction['date'])) {
+            throw new \Exception('Date is required');
+        }
+
+        // Normalize date
+        $transaction['date'] = $this->normalizeDate($transaction['date']);
+
+        // Handle amount: either single column OR dual income/expense columns
+        $amount = null;
+        $type = null;
+
+        // Check for dual-column approach (income + expense)
+        // Parse amount first, then check numeric zero to handle all locale formats (0, 0.00, 0,00, etc.)
+        if (!empty($mapping['incomeColumn']) && isset($row[$mapping['incomeColumn']])) {
+            $incomeValue = trim($row[$mapping['incomeColumn']]);
+            if ($incomeValue !== '') {
+                $parsed = $this->parseAmount($incomeValue);
+                if ($parsed != 0) {
+                    $amount = $parsed;
+                    $type = 'credit';
+                }
+            }
+        }
+
+        if (!empty($mapping['expenseColumn']) && isset($row[$mapping['expenseColumn']])) {
+            $expenseValue = trim($row[$mapping['expenseColumn']]);
+            if ($expenseValue !== '') {
+                $parsed = $this->parseAmount($expenseValue);
+                if ($parsed != 0) {
+                    $amount = $parsed;
+                    $type = 'debit';
+                }
+            }
+        }
+
+        // Fall back to single amount column if dual columns weren't used
+        if ($amount === null && !empty($transaction['amount'])) {
+            $amount = $this->parseAmount($transaction['amount']);
+            $type = $amount >= 0 ? 'credit' : 'debit';
+            $amount = abs($amount);
+        }
+
+        // Ensure we have an amount
+        if ($amount === null) {
+            throw new \Exception('Amount is required (either single amount column or income/expense columns)');
+        }
+
+        $transaction['amount'] = abs($amount);
+        $transaction['type'] = $type;
+
+        // Attach category name metadata if mapped
+        if (!empty($mapping['category']) && !empty($row[$mapping['category']])) {
+            $transaction['_categoryName'] = trim($row[$mapping['category']]);
+        }
+
+        // Attach account name metadata if mapped
+        if (!empty($mapping['account']) && !empty($row[$mapping['account']])) {
+            $transaction['_accountName'] = trim($row[$mapping['account']]);
+        }
+
+        // Attach currency metadata if mapped
+        if (!empty($mapping['currency']) && !empty($row[$mapping['currency']])) {
+            $transaction['_currency'] = strtoupper(trim($row[$mapping['currency']]));
+        }
+
+        // Clean description
+        $transaction['description'] = trim($transaction['description'] ?? '');
+
+        // Set import source for rule matching
+        $transaction['source'] = 'CSV Import';
+
+        return $transaction;
+    }
+
+    /**
+     * Map an OFX transaction to standard format.
+     *
+     * @param array $txn OFX transaction data
+     * @return array Normalized transaction data
+     */
+    public function mapOfxTransaction(array $txn): array {
+        $amount = (float) ($txn['rawAmount'] ?? $txn['amount'] ?? 0);
+
+        return [
+            'date' => $txn['date'] ?? '',
+            'amount' => abs($amount),
+            'type' => $amount >= 0 ? 'credit' : 'debit',
+            'description' => $txn['description'] ?? $txn['name'] ?? '',
+            'memo' => $txn['memo'] ?? null,
+            'reference' => $txn['reference'] ?? $txn['id'] ?? null,
+            'vendor' => $txn['description'] ?? $txn['name'] ?? '',
+            'id' => $txn['id'] ?? null, // Preserve FITID for duplicate detection
+        ];
+    }
+
+    /**
+     * Map a QIF transaction to standard format.
+     *
+     * @param array $txn QIF transaction data
+     * @return array Normalized transaction data
+     */
+    public function mapQifTransaction(array $txn): array {
+        $amount = (float) ($txn['amount'] ?? 0);
+
+        return [
+            'date' => $this->normalizeDate($txn['date'] ?? ''),
+            'amount' => abs($amount),
+            'type' => $amount >= 0 ? 'credit' : 'debit',
+            'description' => $txn['payee'] ?? $txn['memo'] ?? '',
+            'memo' => $txn['memo'] ?? null,
+            'reference' => $txn['number'] ?? $txn['reference'] ?? null,
+            'vendor' => $txn['payee'] ?? '',
+            'category' => $txn['category'] ?? null,
+        ];
+    }
+
+    /**
+     * Detect the date format used across a batch of date strings.
+     *
+     * Scans all dates to find a format that parses every date without
+     * overflow warnings. This disambiguates DD/MM vs MM/DD when any
+     * date in the batch has a day value > 12.
+     *
+     * @param string[] $dateStrings Raw date strings from the import file
+     */
+    public function detectDateFormat(array $dateStrings): void {
+        $this->detectedDateFormat = null;
+
+        // Filter out empty strings and already-normalized dates
+        $candidates = [];
+        foreach ($dateStrings as $d) {
+            $d = trim($d);
+            if ($d === '' || preg_match('/^\d{4}-\d{2}-\d{2}$/', $d) || preg_match('/^\d{8}/', $d)) {
+                continue;
+            }
+            $candidates[] = $d;
+        }
+
+        if (empty($candidates)) {
+            return;
+        }
+
+        foreach (self::DATE_FORMATS as $format) {
+            $allValid = true;
+            foreach ($candidates as $d) {
+                if (!$this->isValidDateParse($format, $d)) {
+                    $allValid = false;
+                    break;
+                }
+            }
+            if ($allValid) {
+                $this->detectedDateFormat = $format;
+                return;
+            }
+        }
+    }
+
+    /**
+     * Manually set the date format hint (e.g., from a preset).
+     */
+    public function setDateFormatHint(?string $format): void {
+        $this->detectedDateFormat = $format;
+    }
+
+    /**
+     * Reset the cached date format between import batches.
+     */
+    public function resetDateFormat(): void {
+        $this->detectedDateFormat = null;
+    }
+
+    /**
+     * Normalize a date string to Y-m-d format.
+     *
+     * @param string $date The date string to normalize
+     * @return string Normalized date in Y-m-d format
+     * @throws \Exception If date cannot be parsed
+     */
+    public function normalizeDate(string $date): string {
+        $date = trim($date);
+
+        // Already normalized (Y-m-d format)
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return $date;
+        }
+
+        // OFX date format: YYYYMMDD or YYYYMMDDHHMMSS
+        if (preg_match('/^(\d{4})(\d{2})(\d{2})/', $date, $matches)) {
+            return "{$matches[1]}-{$matches[2]}-{$matches[3]}";
+        }
+
+        // Use batch-detected format if available
+        if ($this->detectedDateFormat !== null) {
+            $parsed = $this->tryParseDate($this->detectedDateFormat, $date);
+            if ($parsed !== null) {
+                return $parsed;
+            }
+        }
+
+        // Fall back to trying each format with overflow rejection
+        foreach (self::DATE_FORMATS as $format) {
+            $parsed = $this->tryParseDate($format, $date);
+            if ($parsed !== null) {
+                return $parsed;
+            }
+        }
+
+        // Try strtotime as fallback
+        $timestamp = strtotime($date);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        throw new \Exception('Invalid date format: ' . $date);
+    }
+
+    /**
+     * Generate a unique import ID for a transaction.
+     *
+     * @param string $fileId The import file ID (unused, kept for compatibility)
+     * @param int|string $index Row index or identifier
+     * @param array $transaction Transaction data
+     * @return string Unique import ID
+     */
+    public function generateImportId(string $fileId, int|string $index, array $transaction): string {
+        // Use FITID from OFX if available (bank's unique transaction ID)
+        if (!empty($transaction['id'])) {
+            // FITID is globally unique per bank, so we can use it directly.
+            // The OFX spec allows FITIDs up to 255 chars but import_id is
+            // VARCHAR(255) and may gain _dupN suffixes — hash overly long
+            // ones. Threshold 245: 'ofx_fitid_' + 245 = 255, so every FITID
+            // that previously imported successfully keeps its exact legacy ID
+            // (re-import dedup continuity); only previously-failing ones change.
+            $fitid = (string) $transaction['id'];
+            return strlen($fitid) > 245
+                ? 'ofx_fitid_h_' . md5($fitid)
+                : 'ofx_fitid_' . $fitid;
+        }
+
+        // Content-based hash for CSV/QIF imports (no fileId to ensure same transaction = same hash)
+        // This allows duplicate detection across multiple imports of the same statement
+        return 'hash_' . md5(
+            ($transaction['date'] ?? '') .
+            ($transaction['amount'] ?? '') .
+            ($transaction['description'] ?? '') .
+            ($transaction['reference'] ?? '')
+        );
+    }
+
+    /**
+     * Clean and normalize a vendor/payee name.
+     */
+    public function normalizeVendor(?string $vendor): ?string {
+        if ($vendor === null || $vendor === '') {
+            return null;
+        }
+
+        // Trim whitespace
+        $vendor = trim($vendor);
+
+        // Remove multiple spaces
+        $vendor = preg_replace('/\s+/', ' ', $vendor);
+
+        return $vendor;
+    }
+
+    /**
+     * Clean and normalize a description.
+     */
+    public function normalizeDescription(?string $description): string {
+        if ($description === null) {
+            return '';
+        }
+
+        // Trim whitespace
+        $description = trim($description);
+
+        // Remove multiple spaces
+        $description = preg_replace('/\s+/', ' ', $description);
+
+        return $description;
+    }
+
+    /**
+     * Check if a date string validly parses with the given format.
+     *
+     * Rejects parses that produce no errors but are implausible, e.g.
+     * a 4-digit year format (Y) consuming a 2-digit input like "26" → year 0026.
+     */
+    private function isValidDateParse(string $format, string $date): bool {
+        $parsed = \DateTime::createFromFormat($format, $date);
+        if ($parsed === false) {
+            return false;
+        }
+        $errors = \DateTime::getLastErrors();
+        if ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0)) {
+            return false;
+        }
+        // Reject if a 4-digit year format produced a year < 100 (mismatched input)
+        if (str_contains($format, 'Y') && (int) $parsed->format('Y') < 100) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Try to parse a date string with the given format.
+     *
+     * @return string|null Normalized Y-m-d string, or null on failure
+     */
+    private function tryParseDate(string $format, string $date): ?string {
+        if (!$this->isValidDateParse($format, $date)) {
+            return null;
+        }
+        $parsed = \DateTime::createFromFormat($format, $date);
+        return $parsed->format('Y-m-d');
+    }
+
+    /**
+     * Parse amount string handling both comma and period as decimal separators.
+     *
+     * Handles formats like:
+     * - 1234.56 (US/UK format)
+     * - 1,234.56 (US/UK format with thousands separator)
+     * - 1234,56 (European format)
+     * - 1.234,56 (European format with thousands separator)
+     *
+     * @param string|float $amount The amount to parse
+     * @return float Parsed amount
+     */
+    private function parseAmount(string|float $amount): float {
+        // Already a float
+        if (is_float($amount)) {
+            return $amount;
+        }
+
+        // Convert to string and trim
+        $amount = trim((string) $amount);
+
+        // Remove currency symbols and whitespace
+        $amount = preg_replace('/[^\d,.\-+]/', '', $amount);
+
+        // If empty after cleanup, return 0
+        if ($amount === '' || $amount === '-' || $amount === '+') {
+            return 0.0;
+        }
+
+        // Count periods and commas to determine format
+        $periodCount = substr_count($amount, '.');
+        $commaCount = substr_count($amount, ',');
+
+        // Find last occurrence of period and comma
+        $lastPeriod = strrpos($amount, '.');
+        $lastComma = strrpos($amount, ',');
+
+        // Determine decimal separator based on position and count
+        if ($periodCount === 0 && $commaCount === 0) {
+            // No separators - just an integer
+            return (float) $amount;
+        } elseif ($periodCount > 0 && $commaCount === 0) {
+            // Only periods - could be thousands or decimal
+            if ($periodCount === 1 && $lastPeriod > strlen($amount) - 4) {
+                // Single period in last 3 positions = decimal separator
+                return (float) $amount;
+            } else {
+                // Multiple periods or not in decimal position = thousands separator
+                return (float) str_replace('.', '', $amount);
+            }
+        } elseif ($commaCount > 0 && $periodCount === 0) {
+            // Only commas - could be thousands or decimal
+            if ($commaCount === 1 && $lastComma > strlen($amount) - 4) {
+                // Single comma in last 3 positions = decimal separator (European)
+                return (float) str_replace(',', '.', $amount);
+            } else {
+                // Multiple commas or not in decimal position = thousands separator
+                return (float) str_replace(',', '', $amount);
+            }
+        } else {
+            // Both periods and commas present
+            if ($lastPeriod > $lastComma) {
+                // Period comes after comma: 1,234.56 (US format)
+                // Remove commas (thousands), keep period (decimal)
+                return (float) str_replace(',', '', $amount);
+            } else {
+                // Comma comes after period: 1.234,56 (European format)
+                // Remove periods (thousands), replace comma with period (decimal)
+                $amount = str_replace('.', '', $amount);
+                $amount = str_replace(',', '.', $amount);
+                return (float) $amount;
+            }
+        }
+    }
+}

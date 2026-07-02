@@ -100,7 +100,7 @@ export default function CalendarCustomDays() {
               isNeighbouringMonth ? "opacity-40" : ""
 
             return (
-              <div className={`flex h-full w-full flex-col  ${dateData.is_pournami ? "bg-moon" : ""}`}>
+              <div className={`flex h-full w-full flex-col  ${dateData.santhigiri_significant_dates.some(event => event.name === "Pournami") ? "bg-moon" : ""}`}>
                 {
                   dateData.kv.kv_day === 1 ? (
                     <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50">
