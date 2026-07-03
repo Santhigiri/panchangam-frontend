@@ -76,7 +76,7 @@ export default function DayDetailsPage() {
               />
               <div className="flex-1">
                 <DateHeader
-                  date={new Date(activeDateData.date)}
+                  date={activeDate}
                   kv_date={activeDateData.kv}
                 />
               </div>

@@ -152,7 +152,7 @@ export default function CalendarCustomDays() {
             <div className="grid grid-col-2 justify-items-stretch">
               <div className="col-span-2">
                 <DateHeader
-                  date={new Date(selectedDateData.date)}
+                  date={selectedDate}
                   kv_date={selectedDateData.kv}
                 />
               </div>
