@@ -71,7 +71,7 @@ function RootLayout() {
   return (
     <div className="flex flex-col-reverse md:flex-row min-h-screen w-full bg-[#F5F5DC]">
       <Sidebar />
-      <main className="flex-1 overflow-auto p-2 md:ml-16">
+      <main className="flex-1 overflow-auto p-2 pb-24 md:pb-2 md:ml-16">
         <Outlet /> {/* Child routes render here */}
       </main>
     </div>
