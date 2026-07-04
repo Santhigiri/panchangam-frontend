@@ -32,7 +32,7 @@ export const RefreshPrompt = () => {
   if (!needRefresh) return null;
 
   return (
-    <div className="fixed bottom-10 right-4 bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
+    <div className="fixed bottom-24 md:bottom-10 right-4 z-[60] bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
       <p className="text-sm text-gray-700">New update available!</p>
       <button
         onClick={reloadPage}
