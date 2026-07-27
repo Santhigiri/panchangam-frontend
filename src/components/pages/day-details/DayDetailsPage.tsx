@@ -7,12 +7,37 @@ import ThithiTransitionCard from "../calendar/ThithiTransitionCard";
 import { NakshatraTransitionCard } from "../calendar/NakshatraTransitionCard";
 import UpcomingEventsCard from "../calendar/UpcomingEventsCard";
 import GuruvaniCard from "./GuruvaniCard";
+import type { DayButton } from "react-day-picker";
+import type { ComponentProps } from "react";
 import TopAppBar from "@/components/shared/TopAppBar";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useHomePanchangam } from "@/hooks/homepage/useHomePanchangam";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+// Selected takes the color today used to have (amber-700) and today takes
+// the color selected used to have (the primary saffron) — inverted on
+// purpose so the two states read distinctly from each other.
+function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<typeof DayButton>) {
+  // The day cell goes rounded-none specifically when today AND selected
+  // coincide (see the `today` classNames override below) — the button
+  // itself defaults to rounded-md from the base Button component with no
+  // matching override, so without this the cell's orange background peeks
+  // through as triangles in the corners where the two roundings disagree.
+
+  return (
+    <CalendarDayButton
+      modifiers={modifiers}
+      className={cn(
+        "data-[selected-single=true]:bg-amber-700 data-[selected-single=true]:text-white",
+        className
+      )}
+      {...props}
+    />
+  )
+}
 
 export default function DayDetailsPage() {
   const { activeDate, setActiveDate, activeDateData, upcomingEvents } = useHomePanchangam();
@@ -49,6 +74,12 @@ export default function DayDetailsPage() {
                     setDatePickerOpen(false);
                   }
                 }}
+                classNames={{
+                  today: "rounded-lg bg-primary text-primary-foreground font-semibold data-[selected=true]:bg-transparent",
+                }}
+                components={{
+                  DayButton: DatePickerDayButton,
+                }}
               />
             </PopoverContent>
           </Popover>
@@ -56,9 +87,6 @@ export default function DayDetailsPage() {
       />
 
       <div className="grid grid-cols-2 justify-items-stretch gap-4 p-2">
-        <div className="col-span-2">
-          <GuruvaniCard />
-        </div>
 
         {activeDateData && (
           <>
@@ -79,6 +107,9 @@ export default function DayDetailsPage() {
                   onClick={() => setActiveDate(addDays(activeDate, 1))}
                 />
               </div>
+            </div>
+            <div className="col-span-2">
+              <GuruvaniCard />
             </div>
 
             <div className="col-span-2 m-2">
