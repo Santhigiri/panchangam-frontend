@@ -92,5 +92,3 @@ export const panchangamData = z.object({
 })
 
 export type PanchangamDayData = z.infer<typeof panchangamData>
-
-export const monthlyPanchangamData = z.record(z.string(), panchangamData)

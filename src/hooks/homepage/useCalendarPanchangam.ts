@@ -2,12 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PanchangamDayData } from "@/api/schemas/panchangamData";
 import { getPanchangamYear } from "@/api/panchangamGeneration";
-import {
-  useMasaReference,
-  useNakshatraReference,
-  useSanthigiriEvents,
-  useThithiReference,
-} from "@/hooks/usePanchangamReference";
+import { useReferenceMaps } from "@/hooks/homepage/useReferenceMaps";
 import { enrichPanchangamDay } from "@/lib/enrichPanchangamData";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
 
@@ -74,27 +69,9 @@ export function useCalendarPanchangam(initialActiveDate = new Date()) {
     enabled: hasNextYear,
   })
 
-  const nakshatraReference = useNakshatraReference()
-  const thithiReference = useThithiReference()
-  const masaReference = useMasaReference()
-  const eventsReference = useSanthigiriEvents()
+  const { referenceMaps, isLoading: isReferenceLoading } = useReferenceMaps()
 
-  const isLoading =
-    yearQuery.isLoading ||
-    nakshatraReference.isLoading ||
-    thithiReference.isLoading ||
-    masaReference.isLoading ||
-    eventsReference.isLoading
-
-  const referenceMaps = useMemo(
-    () => ({
-      nakshatraByName: new Map((nakshatraReference.data ?? []).map((n) => [n.name, n])),
-      thithiByName: new Map((thithiReference.data ?? []).map((t) => [t.name, t])),
-      masaByName: new Map((masaReference.data ?? []).map((m) => [m.name, m])),
-      eventById: new Map((eventsReference.data ?? []).map((e) => [e.id, e])),
-    }),
-    [nakshatraReference.data, thithiReference.data, masaReference.data, eventsReference.data]
-  )
+  const isLoading = yearQuery.isLoading || isReferenceLoading
 
   const monthData = useMemo(() => {
     if (!yearQuery.data) return undefined

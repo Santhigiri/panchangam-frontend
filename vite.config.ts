@@ -32,7 +32,16 @@ const config = defineConfig({
         // force a network request, defeating it.
         navigateFallback: 'index.html',
         globPatterns: ['**/*.{js,css,ico,png,svg,html}'],
-        globDirectory: 'dist'
+        globDirectory: 'dist',
+        // Without this, an activating SW never takes control of the tab
+        // that's already open (only future navigations get controlled) — so
+        // testing offline right after the very first visit fails even
+        // though the SW installed fine, since it was never actually in the
+        // fetch path yet. Safe to combine with registerType: 'prompt' below
+        // — this only governs "claim already-open tabs once active", not
+        // "when does a new version become active", which RefreshPrompt
+        // still gates for real updates.
+        clientsClaim: true,
       },
       includeAssets: [
         "favicon.ico",

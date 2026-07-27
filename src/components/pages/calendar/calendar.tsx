@@ -91,11 +91,15 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       day={day}
       modifiers={modifiers}
       className={cn(
-        "aspect-auto h-full min-h-20 md:min-h-28 min-w-0 items-start justify-start p-0 overflow-hidden",
+        "aspect-auto h-full min-h-16 md:min-h-24 min-w-0 items-start justify-start rounded-none p-0 overflow-hidden cursor-default data-[selected-single=true]:bg-transparent data-[selected-single=true]:text-inherit",
         isPournami && "bg-moon",
         className
       )}
       {...props}
+      // Clicking doesn't do anything (no onSelect is wired up) — override
+      // DayPicker's own click handler so it can't quietly flip internal
+      // selection state and highlight the day for no functional reason.
+      onClick={(e) => e.preventDefault()}
     >
       {dateData?.kv.kv_day === 1 ? (
         <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50 w-full text-center leading-snug break-words">
@@ -104,12 +108,12 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       ) : (
         <div className="h-4" />
       )}
-      <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle mt-4 font-bold", isNeighbouringMonth && "opacity-40")}>
+      <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle pt-0.5 lg:pt-2  mt-1 font-bold", isNeighbouringMonth && "opacity-40")}>
         {day.date.getDate()}
       </p>
-      <div className={cn("flex justify-between w-full min-w-0 gap-1 pb-2 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
-        <p className="text-[8px] lg:text-[14px] text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
-        <p className="text-[8px] lg:text-[14px] leading-none text-right truncate">{dateData?.nakshatra.ml}</p>
+      <div className={cn("flex items-baseline justify-between w-full min-w-0 gap-1 pb-1 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
+        <p className="text-[8px] lg:text-[14px] leading-tight text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
+        <p className="text-[8px] lg:text-[14px] leading-tight text-right truncate">{dateData?.nakshatra.ml}</p>
       </div>
     </CalendarDayButton>
   )
