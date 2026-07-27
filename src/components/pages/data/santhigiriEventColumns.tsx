@@ -1,0 +1,62 @@
+import { Pencil, Trash2 } from "lucide-react"
+import { SortableHeader } from "./SortableHeader"
+import type { ColumnDef } from "@tanstack/react-table"
+import type { SanthigiriEvent } from "@/api/schemas/santhigiriEvent"
+import { Button } from "@/components/ui/button"
+
+type BuildColumnsArgs = {
+  isAdmin: boolean
+  onEdit: (event: SanthigiriEvent) => void
+  onDelete: (event: SanthigiriEvent) => void
+}
+
+export function buildSanthigiriEventColumns({
+  isAdmin,
+  onEdit,
+  onDelete,
+}: BuildColumnsArgs): Array<ColumnDef<SanthigiriEvent>> {
+  const columns: Array<ColumnDef<SanthigiriEvent>> = [
+    {
+      accessorKey: "name",
+      header: ({ column }) => <SortableHeader label="Name" column={column} />,
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <span className="line-clamp-2 max-w-md whitespace-pre-line">
+          {row.original.description.trim()}
+        </span>
+      ),
+    },
+  ]
+
+  if (isAdmin) {
+    columns.push({
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Edit ${row.original.name}`}
+            onClick={() => onEdit(row.original)}
+          >
+            <Pencil />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Delete ${row.original.name}`}
+            onClick={() => onDelete(row.original)}
+          >
+            <Trash2 />
+          </Button>
+        </div>
+      ),
+    })
+  }
+
+  return columns
+}

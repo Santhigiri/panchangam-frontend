@@ -1,78 +1,66 @@
 import useDayDetails from "@/hooks/useDayDetails";
-import { addDays, format } from "date-fns";
-import { CalendarIcon, ChevronDownIcon, ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon } from "lucide-react";
+import { addDays } from "date-fns";
+import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import DateHeader from "../calendar/DateHeader";
 import SunriseSunsetCard from "../calendar/SunriseSunsetCard";
 import ThithiTransitionCard from "../calendar/ThithiTransitionCard";
 import { NakshatraTransitionCard } from "../calendar/NakshatraTransitionCard";
 import { AshramSignificance } from "../calendar/AshramSignificanceCard";
-import DatePicker from "react-datepicker";
-
-import "react-datepicker/dist/react-datepicker.css";
-import './date-picker.css'
 import { useState } from "react";
 import TopAppBar from "@/components/shared/TopAppBar";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
-
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 
 export default function DayDetailsPage() {
-  const {
-    activeDate,
-    setActiveDate,
-    activeDateData,
-  } = useDayDetails();
+  const { activeDate, setActiveDate, activeDateData } = useDayDetails();
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  function getTomorrowData() {
-    setActiveDate(addDays(activeDate, 1));
-  }
-
-  function getYesterdayData() {
-    setActiveDate(addDays(activeDate, -1));
-  }
-
-  const [datePickerOpen, setDatePickerOpen] = useState(false)
-
-  console.log(`datePickerOpen: ${datePickerOpen}`)
   return (
     <div className="flex flex-col items-stretch">
       <TopAppBar
         title="Daily Panchangam"
         actions={
-          <>
-            <CalendarIcon onClick={() => {
-              setDatePickerOpen(prev => !prev)
-            }} />
-            {
-              datePickerOpen && (
-                <DatePicker
-                  selected={activeDate}
-                  minDate={new Date(CALENDAR_START_DATE)}
-                  maxDate={new Date(CALENDAR_END_DATE)}
-                  open={datePickerOpen}
-                  customInput={<div />}
-                  disabledKeyboardNavigation={true}
-                  popperPlacement="top-end"
-                  onSelect={
-                    (date) => {
-                      if (date) {
-                        setDatePickerOpen(false)
-                        console.log(date)
-                        setActiveDate(date)
-                      }
-                    }
-                  } />
-              )
-            }
-          </>
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Pick a date">
+                <CalendarIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0"
+              align="end"
+              onOpenAutoFocus={(event) => event.preventDefault()}
+            >
+              <Calendar
+                mode="single"
+                selected={activeDate}
+                defaultMonth={activeDate}
+                startMonth={CALENDAR_START_DATE}
+                endMonth={CALENDAR_END_DATE}
+                disabled={(date) =>
+                  date < CALENDAR_START_DATE || date > CALENDAR_END_DATE
+                }
+                onSelect={(date) => {
+                  if (date) {
+                    setActiveDate(date);
+                    setDatePickerOpen(false);
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         }
       />
       {activeDateData && (
-        <div className="grid grid-cols-2 justify-items-stretch gap-4 p-2">  {/* Fixed: grid-col-2 → grid-cols-2 */}
+
+        <div className="grid grid-cols-2 justify-items-stretch gap-4 p-2">
           <div className="col-span-2">
             <div className="flex flex-row justify-center items-center">
               <ChevronLeft
                 className="w-12 h-12 cursor-pointer"
-                onClick={getYesterdayData}
+                onClick={() => setActiveDate(addDays(activeDate, -1))}
               />
               <div className="flex-1">
                 <DateHeader
@@ -82,7 +70,7 @@ export default function DayDetailsPage() {
               </div>
               <ChevronRight
                 className="w-12 h-12 cursor-pointer"
-                onClick={getTomorrowData}
+                onClick={() => setActiveDate(addDays(activeDate, 1))}
               />
             </div>
           </div>

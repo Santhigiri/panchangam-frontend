@@ -1,6 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Star, Settings, Menu, X, type LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Home, Calendar, Database, Menu, X, LogIn, type LucideIcon, LogInIcon } from "lucide-react";
 import { useState } from "react";
+import { LoginDialog } from "@/components/shared/LoginDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 
 type NavItemProps = {
   to: string;
@@ -8,30 +11,61 @@ type NavItemProps = {
   label: string;
 };
 
-const navItems: NavItemProps[] = [
+const baseNavItems: Array<NavItemProps> = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/calendar", icon: Calendar, label: "Calendar" },
 ];
 
+const adminNavItems: Array<NavItemProps> = [
+  { to: "/data", icon: Database, label: "Data" },
+];
+
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { isAuthenticated, username, role, logout } = useAuth();
+  const { isMobileMenuOpen, closeMobileMenu } = useMobileSidebar();
+  const navItems = role === "admin" ? [...baseNavItems, ...adminNavItems] : baseNavItems;
+  const showLabels = !isCollapsed || isMobileMenuOpen;
 
   return (
     <>
-      {/* ===== DESKTOP SIDEBAR (Fixed Left) ===== */}
+      {/* Backdrop behind the mobile drawer — tap to dismiss */}
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-40"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ===== SIDEBAR (Fixed Left, all breakpoints) =====
+          Mobile: hidden (w-0) until opened via the TopAppBar hamburger, then a w-64 drawer.
+          Desktop (md+): always visible, toggled between icon-only (w-16) and labeled (w-64). */}
       <aside
         className={`
-          hidden md:flex md:flex-col fixed left-0 top-0 min-h-screen bg-muted drop-shadow-sm
-          text-muted-foreground transition-all duration-300 ease-in-out z-50
-          ${isCollapsed ? "w-16" : "w-64"}
+          flex flex-col fixed left-0 top-0 min-h-screen bg-muted drop-shadow-sm
+          text-muted-foreground transition-all duration-300 ease-in-out z-50 overflow-hidden
+          ${isMobileMenuOpen ? "w-64" : "w-0"}
+          ${isCollapsed ? "md:w-16" : "md:w-64"}
+          md:overflow-visible
         `}
       >
-        <div className="p-4 border-b border-amber-700">
+        <div className="p-4 border-b border-amber-700 flex items-center justify-between">
+          {/* Desktop icon-only/labeled toggle */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
+            className="hidden md:inline-flex p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
           >
             {isCollapsed ? <Menu size={20} /> : <X size={20} />}
+          </button>
+          {/* Mobile drawer close button */}
+          <button
+            onClick={closeMobileMenu}
+            aria-label="Close menu"
+            className="md:hidden p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
+          >
+            <X size={20} />
           </button>
         </div>
 
@@ -41,6 +75,7 @@ export default function Sidebar() {
               <Link
                 key={to}
                 to={to}
+                onClick={closeMobileMenu}
                 activeProps={{ className: "bg-amber-700 text-accent-foreground" }}
                 className={`
                   flex items-center gap-3 px-4 py-3 m-2 rounded-md
@@ -48,14 +83,42 @@ export default function Sidebar() {
                 `}
               >
                 <Icon size={20} className="min-w-5" />
-                {!isCollapsed && <span className="truncate">{label}</span>}
+                {showLabels && <span className="truncate">{label}</span>}
               </Link>
             );
           })}
         </nav>
+
+        <div className="mt-auto p-2 border-t border-amber-700">
+          {isAuthenticated ? (
+            <button
+              onClick={logout}
+              className={`
+                  flex items-center gap-3 p-3 m-1 rounded-md
+                  transition-colors hover:bg-amber-800 hover:text-accent-foreground
+                `}
+            >
+              <LogInIcon size={20} className="min-w-5" />
+              {showLabels && <span className="truncate">Log out ({username})</span>}
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className={`
+                  flex items-center gap-3 px-3 py-3 m-1 rounded-md
+                  transition-colors hover:bg-amber-800 hover:text-accent-foreground
+                `}
+            >
+              <LogIn size={20} className="min-w-5" />
+              {showLabels && <span className="truncate">Log in</span>}
+            </button>
+          )}
+        </div>
       </aside>
 
-      {/* ===== MOBILE BOTTOM NAV (Fixed Bottom) ===== */}
+      <LoginDialog open={isLoginOpen} onOpenChange={setIsLoginOpen} />
+
+      {/* ===== MOBILE BOTTOM NAV (Fixed Bottom, mobile-only, in addition to the sidebar) ===== */}
       <nav
         className={`
           md:hidden fixed bottom-0 left-0 right-0 bg-muted drop-shadow-sm

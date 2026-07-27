@@ -136,3 +136,32 @@
     @apply font-sans;
     }
 }
+
+/* Pournami (full moon) tile background */
+.bg-moon {
+  position: relative;
+}
+
+.bg-moon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/moon.png');
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-moon > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .bg-moon::before {
+    background-size: 80%;
+  }
+}
