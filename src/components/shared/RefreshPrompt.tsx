@@ -10,6 +10,15 @@ export const RefreshPrompt = () => {
     onNeedRefresh() { setNeedRefresh(true) },
     onOfflineReady() {},
     onRegisterError(error) { console.error('SW registration error:', error) },
+    onRegisteredSW(_url, registration) {
+      // An installed/standalone PWA is usually resumed rather than freshly
+      // navigated, so the browser's own update check (which fires on
+      // navigation) rarely runs on its own — poll for updates explicitly.
+      if (!registration) return
+      setInterval(() => {
+        registration.update()
+      }, 60 * 60 * 1000) // hourly
+    },
   });
 
   const reloadPage = () => {
