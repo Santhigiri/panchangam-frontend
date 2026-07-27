@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PanchangamDayData } from "@/api/schemas/panchangamData";
 import { getPanchangamYear } from "@/api/panchangamGeneration";
 import {
@@ -26,18 +26,25 @@ export function dateToKey(dt: Date) {
 export function useCalendarPanchangam(initialActiveDate = new Date()) {
   const [activeDate, setActiveDate] = useState<Date>(initialActiveDate);
   const year = activeDate.getFullYear()
+  const queryClient = useQueryClient()
 
   const previousYear = year - 1
   const nextYear = year + 1
   const hasPreviousYear = previousYear >= CALENDAR_START_DATE.getFullYear()
   const hasNextYear = nextYear <= CALENDAR_END_DATE.getFullYear()
 
+  const yearQueryKey = ["panchangam-year-v1", year, LOCATION]
+  const previousYearQueryKey = ["panchangam-year-v1", previousYear, LOCATION]
+  const nextYearQueryKey = ["panchangam-year-v1", nextYear, LOCATION]
+
   // staleTime: 0 — always revalidate on mount/focus; the yearly endpoint is
-  // ETag-validated so a revalidation that finds nothing changed is a cheap 304,
-  // not a full refetch.
+  // ETag-validated, and getPanchangamYear resolves instantly from the cached
+  // value while quietly revalidating in the background (see
+  // fetchWithEtag's onBackgroundUpdate), so this never blocks on the network.
   const yearQuery = useQuery({
-    queryKey: ["panchangam-year-v1", year, LOCATION],
-    queryFn: () => getPanchangamYear(year, LOCATION),
+    queryKey: yearQueryKey,
+    queryFn: () =>
+      getPanchangamYear(year, LOCATION, (data) => queryClient.setQueryData(yearQueryKey, data)),
     staleTime: 0,
   })
 
@@ -49,14 +56,20 @@ export function useCalendarPanchangam(initialActiveDate = new Date()) {
   // Dec→Jan (or the year selector) hits an already-cached/ETag-validated
   // query instead of a cold fetch.
   const previousYearQuery = useQuery({
-    queryKey: ["panchangam-year-v1", previousYear, LOCATION],
-    queryFn: () => getPanchangamYear(previousYear, LOCATION),
+    queryKey: previousYearQueryKey,
+    queryFn: () =>
+      getPanchangamYear(previousYear, LOCATION, (data) =>
+        queryClient.setQueryData(previousYearQueryKey, data)
+      ),
     staleTime: 0,
     enabled: hasPreviousYear,
   })
   const nextYearQuery = useQuery({
-    queryKey: ["panchangam-year-v1", nextYear, LOCATION],
-    queryFn: () => getPanchangamYear(nextYear, LOCATION),
+    queryKey: nextYearQueryKey,
+    queryFn: () =>
+      getPanchangamYear(nextYear, LOCATION, (data) =>
+        queryClient.setQueryData(nextYearQueryKey, data)
+      ),
     staleTime: 0,
     enabled: hasNextYear,
   })

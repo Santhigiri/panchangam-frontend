@@ -46,11 +46,16 @@ export async function getPanchangamMonth(year: number, month: number, location: 
   return compactPanchangamMonth.parseAsync(json)
 }
 
-export function getPanchangamYear(year: number, location: string): Promise<CompactPanchangamYear> {
+export function getPanchangamYear(
+  year: number,
+  location: string,
+  onBackgroundUpdate?: (data: CompactPanchangamYear) => void
+): Promise<CompactPanchangamYear> {
   return fetchWithEtag(
     `${APP_BASE_URL}/api/v1/panchangam/year?year=${year}&location=${location}`,
     `year:${location}:${year}`,
-    compactPanchangamYear
+    compactPanchangamYear,
+    { onBackgroundUpdate }
   )
 }
 

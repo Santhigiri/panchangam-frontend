@@ -2,25 +2,27 @@ import * as z from "zod"
 import { masa, nakshatra, thithi } from "./schemas/panchangamData"
 import { santhigiriEvent } from "./schemas/santhigiriEvent"
 import { fetchWithEtag } from "./conditionalFetch"
+import type { SanthigiriEvent } from "./schemas/santhigiriEvent"
+import type { Masa, Nakshatra, Thithi } from "./schemas/panchangamData"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
-function fetchReference<T>(path: string, schema: z.ZodType<T>) {
-  return fetchWithEtag(`${APP_BASE_URL}/api/v1/panchangam/${path}`, path, schema)
+function fetchReference<T>(path: string, schema: z.ZodType<T>, onBackgroundUpdate?: (data: T) => void) {
+  return fetchWithEtag(`${APP_BASE_URL}/api/v1/panchangam/${path}`, path, schema, { onBackgroundUpdate })
 }
 
-export function getNakshatraReference() {
-  return fetchReference("nakshatra", z.array(nakshatra))
+export function getNakshatraReference(onBackgroundUpdate?: (data: Array<Nakshatra>) => void) {
+  return fetchReference("nakshatra", z.array(nakshatra), onBackgroundUpdate)
 }
 
-export function getThithiReference() {
-  return fetchReference("thithi", z.array(thithi))
+export function getThithiReference(onBackgroundUpdate?: (data: Array<Thithi>) => void) {
+  return fetchReference("thithi", z.array(thithi), onBackgroundUpdate)
 }
 
-export function getSanthigiriEvents() {
-  return fetchReference("events", z.array(santhigiriEvent))
+export function getSanthigiriEvents(onBackgroundUpdate?: (data: Array<SanthigiriEvent>) => void) {
+  return fetchReference("events", z.array(santhigiriEvent), onBackgroundUpdate)
 }
 
-export function getMasaReference() {
-  return fetchReference("masa", z.array(masa))
+export function getMasaReference(onBackgroundUpdate?: (data: Array<Masa>) => void) {
+  return fetchReference("masa", z.array(masa), onBackgroundUpdate)
 }

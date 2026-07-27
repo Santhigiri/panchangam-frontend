@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   getMasaReference,
   getNakshatraReference,
@@ -10,33 +10,41 @@ import { getSanthigiriEvent } from "@/api/santhigiriEvents"
 const REFERENCE_STALE_TIME = 1000 * 60 * 60 * 24 // reference data changes rarely
 
 export function useNakshatraReference() {
+  const queryClient = useQueryClient()
+  const queryKey = ["nakshatra-reference"]
   return useQuery({
-    queryKey: ["nakshatra-reference"],
-    queryFn: getNakshatraReference,
+    queryKey,
+    queryFn: () => getNakshatraReference((data) => queryClient.setQueryData(queryKey, data)),
     staleTime: REFERENCE_STALE_TIME,
   })
 }
 
 export function useThithiReference() {
+  const queryClient = useQueryClient()
+  const queryKey = ["thithi-reference"]
   return useQuery({
-    queryKey: ["thithi-reference"],
-    queryFn: getThithiReference,
+    queryKey,
+    queryFn: () => getThithiReference((data) => queryClient.setQueryData(queryKey, data)),
     staleTime: REFERENCE_STALE_TIME,
   })
 }
 
 export function useMasaReference() {
+  const queryClient = useQueryClient()
+  const queryKey = ["masa-reference"]
   return useQuery({
-    queryKey: ["masa-reference"],
-    queryFn: getMasaReference,
+    queryKey,
+    queryFn: () => getMasaReference((data) => queryClient.setQueryData(queryKey, data)),
     staleTime: REFERENCE_STALE_TIME,
   })
 }
 
 export function useSanthigiriEvents() {
+  const queryClient = useQueryClient()
+  const queryKey = ["santhigiri-events"]
   return useQuery({
-    queryKey: ["santhigiri-events"],
-    queryFn: getSanthigiriEvents,
+    queryKey,
+    queryFn: () => getSanthigiriEvents((data) => queryClient.setQueryData(queryKey, data)),
     staleTime: REFERENCE_STALE_TIME,
   })
 }

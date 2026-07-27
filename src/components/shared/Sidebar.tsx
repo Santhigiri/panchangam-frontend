@@ -40,11 +40,13 @@ export default function Sidebar() {
       )}
 
       {/* ===== SIDEBAR (Fixed Left, all breakpoints) =====
-          Mobile: hidden (w-0) until opened via the TopAppBar hamburger, then a w-64 drawer.
-          Desktop (md+): always visible, toggled between icon-only (w-16) and labeled (w-64). */}
+          Mobile: hidden (w-0) until opened via the TopAppBar hamburger, then a w-64 drawer that
+          stops above the bottom nav (bottom-16) so the two never overlap and the login button
+          at the bottom of the drawer stays fully visible.
+          Desktop (md+): full height (bottom-0), toggled between icon-only (w-16) and labeled (w-64). */}
       <aside
         className={`
-          flex flex-col fixed left-0 top-0 min-h-screen bg-muted drop-shadow-sm
+          flex flex-col fixed left-0 top-0 bottom-16 md:bottom-0 bg-muted drop-shadow-sm
           text-muted-foreground transition-all duration-300 ease-in-out z-50 overflow-hidden
           ${isMobileMenuOpen ? "w-64" : "w-0"}
           ${isCollapsed ? "md:w-16" : "md:w-64"}
@@ -118,14 +120,15 @@ export default function Sidebar() {
 
       <LoginDialog open={isLoginOpen} onOpenChange={setIsLoginOpen} />
 
-      {/* ===== MOBILE BOTTOM NAV (Fixed Bottom, mobile-only, in addition to the sidebar) ===== */}
+      {/* ===== MOBILE BOTTOM NAV (Fixed Bottom, mobile-only, in addition to the sidebar) =====
+          Fixed h-16 so the sidebar drawer's bottom-16 offset lines up exactly, with no gap or overlap. */}
       <nav
         className={`
-          md:hidden fixed bottom-0 left-0 right-0 bg-muted drop-shadow-sm
+          md:hidden fixed bottom-0 left-0 right-0 h-16 bg-muted drop-shadow-sm
           text-muted-foreground z-50 safe-area-inset-bottom
         `}
       >
-        <div className="flex justify-evenly items-stretch py-2">
+        <div className="flex h-full justify-evenly items-center py-2">
           {navItems.map(({ to, icon: Icon, label }) => {
             return (
               <Link
