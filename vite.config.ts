@@ -25,13 +25,13 @@ const config = defineConfig({
       strategies: 'generateSW',
       workbox: {
         sourcemap: true,
-        runtimeCaching: [
-          {
-            urlPattern: /\/$/,  // Matches all HTML navigation requests
-            handler: 'NetworkOnly',  // Never caches HTML, always fetches from network
-          },
-        ],
-        globPatterns: ['**/*.{js,css,ico,png,svg}'],
+        // Precached index.html served for any navigation the network can't
+        // fulfil (offline) — this is what makes the app shell load at all
+        // without connectivity. No runtimeCaching override for navigations
+        // here: that would take precedence over this fallback and always
+        // force a network request, defeating it.
+        navigateFallback: 'index.html',
+        globPatterns: ['**/*.{js,css,ico,png,svg,html}'],
         globDirectory: 'dist'
       },
       includeAssets: [
