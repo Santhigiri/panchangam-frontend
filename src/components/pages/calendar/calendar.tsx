@@ -149,8 +149,6 @@ export default function CalendarCustomDays() {
             })}
           </div>
         </div>
-
-      </div>
       <div className="md:col-span-1 w-full">
         {
           selectedDateData ? (
