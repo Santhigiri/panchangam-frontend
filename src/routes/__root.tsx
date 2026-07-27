@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { queryClient } from "@/lib/query-client"
 import { RefreshPrompt } from "@/components/shared/RefreshPrompt"
 import Sidebar from "@/components/shared/Sidebar"
+import { AuthProvider } from "@/hooks/useAuth"
+import { MobileSidebarProvider } from "@/hooks/useMobileSidebar"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -38,9 +40,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <div className="flex flex-col-reverse md:flex-row min-h-screen w-full bg-[#F5F5DC]">
+      <div className="flex min-h-screen w-full bg-[#F5F5DC]">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-2 md:ml-16">
+        <main className="flex-1 overflow-auto p-2 pb-20 md:ml-16 md:pb-2">
           <Outlet /> {/* Child routes render here */}
         </main>
       </div>
@@ -51,9 +53,13 @@ function RootComponent() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <HeadContent />
-      {children}
-      <RefreshPrompt />
+      <AuthProvider>
+        <MobileSidebarProvider>
+          <HeadContent />
+          {children}
+          <RefreshPrompt />
+        </MobileSidebarProvider>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

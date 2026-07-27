@@ -16,6 +16,15 @@ export const nakshatra = z.object({
 
 export type Nakshatra = z.infer<typeof nakshatra>
 
+export const masa = z.object({
+  name: z.string(),
+  id: z.number().int(),
+  ml: z.string(),
+  en: z.string()
+})
+
+export type Masa = z.infer<typeof masa>
+
 export const paksha = z.object({
   name: z.string(),
   id: z.number().int(),
@@ -23,7 +32,7 @@ export const paksha = z.object({
   en: z.string()
 })
 
-const thithi = z.object({
+export const thithi = z.object({
   name: z.string(),
   paksha: paksha,
   id: z.number().int(),
@@ -38,7 +47,7 @@ export const thithi_transition = z.object({
   name: z.string(),
   thithi: thithi,
   start_time: isoDatetime,
-  end_time: isoDatetime
+  end_time: isoDatetime.nullable()
 })
 
 export type ThithiTransition = z.infer<typeof thithi_transition>
@@ -47,7 +56,7 @@ export const nakshatra_transition = z.object({
   name: z.string(),
   nakshatra: nakshatra,
   start_time: isoDatetime,
-  end_time: isoDatetime
+  end_time: isoDatetime.nullable()
 })
 
 export type NakshatraTransition = z.infer<typeof nakshatra_transition>
