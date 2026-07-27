@@ -1,18 +1,15 @@
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 export const RefreshPrompt = () => {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onNeedRefresh() {
-      setNeedRefresh(true);
-    },
-    onOfflineReady() {
-    },
-    onRegisterError(error) {
-      console.error('SW registration error:', error);
-    },
+    onNeedRefresh() { setNeedRefresh(true) },
+    onOfflineReady() {},
+    onRegisterError(error) { console.error('SW registration error:', error) },
   });
 
   const reloadPage = () => {
@@ -24,7 +21,7 @@ export const RefreshPrompt = () => {
             caches.delete(cacheName);
           }
         });
-        updateServiceWorker(true); // Skip waiting + reload
+        updateServiceWorker(true);
       });
     }
   };
@@ -32,14 +29,13 @@ export const RefreshPrompt = () => {
   if (!needRefresh) return null;
 
   return (
-    <div className="fixed bottom-24 md:bottom-10 right-4 z-[60] bg-[#E4E4CC] p-4 rounded-lg shadow-lg border">
-      <p className="text-sm text-gray-700">New update available!</p>
-      <button
-        onClick={reloadPage}
-        className="mt-2 p-2 text-[#E4E4CC] text-xs bg-[#8F4E00] rounded hover:opacity-70"
-      >
-        Refresh
-      </button>
-    </div>
+    <Card className="fixed bottom-10 right-4 shadow-lg w-48">
+      <CardContent className="pt-4 flex flex-col gap-2">
+        <p className="text-sm">New update available!</p>
+        <Button size="sm" onClick={reloadPage} className="bg-[#8F4E00] hover:opacity-70">
+          Refresh
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
