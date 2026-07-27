@@ -91,7 +91,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       day={day}
       modifiers={modifiers}
       className={cn(
-        "aspect-auto h-full min-h-20 md:min-h-28 min-w-0 items-start justify-start p-0 overflow-hidden",
+        "aspect-auto h-full min-h-24 md:min-h-32 min-w-0 items-start justify-start p-0 overflow-hidden",
         isPournami && "bg-moon",
         className
       )}
@@ -107,9 +107,9 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle mt-4 font-bold", isNeighbouringMonth && "opacity-40")}>
         {day.date.getDate()}
       </p>
-      <div className={cn("flex justify-between w-full min-w-0 gap-1 pb-2 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
-        <p className="text-[8px] lg:text-[14px] text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
-        <p className="text-[8px] lg:text-[14px] leading-none text-right truncate">{dateData?.nakshatra.ml}</p>
+      <div className={cn("flex items-baseline justify-between w-full min-w-0 gap-1 pb-2 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
+        <p className="text-[8px] lg:text-[14px] leading-tight text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
+        <p className="text-[8px] lg:text-[14px] leading-tight text-right truncate">{dateData?.nakshatra.ml}</p>
       </div>
     </CalendarDayButton>
   )
