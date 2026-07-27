@@ -91,14 +91,14 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       day={day}
       modifiers={modifiers}
       className={cn(
-        "aspect-auto h-full min-h-20 md:min-h-28 items-start justify-start p-0 overflow-hidden",
+        "aspect-auto h-full min-h-20 md:min-h-28 min-w-0 items-start justify-start p-0 overflow-hidden",
         isPournami && "bg-moon",
         className
       )}
       {...props}
     >
       {dateData?.kv.kv_day === 1 ? (
-        <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50 w-full text-center leading-snug">
+        <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50 w-full text-center leading-snug break-words">
           {dateData.kv.kv_month_name_ml}
         </p>
       ) : (
@@ -107,9 +107,9 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle mt-4 font-bold", isNeighbouringMonth && "opacity-40")}>
         {day.date.getDate()}
       </p>
-      <div className={cn("flex justify-between w-full pb-2 px-2 mt-auto", isNeighbouringMonth && "opacity-40")}>
-        <p className="text-[10px] lg:text-[14px] text-blue-600">{dateData?.kv.kv_day}</p>
-        <p className="text-[10px] lg:text-[14px] leading-none text-right">{dateData?.nakshatra.ml}</p>
+      <div className={cn("flex justify-between w-full min-w-0 gap-1 pb-2 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
+        <p className="text-[8px] lg:text-[14px] text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
+        <p className="text-[8px] lg:text-[14px] leading-none text-right truncate">{dateData?.nakshatra.ml}</p>
       </div>
     </CalendarDayButton>
   )
@@ -235,63 +235,66 @@ export default function CalendarCustomDays() {
     <div className="flex flex-col items-stretch">
       <TopAppBar title="Calendar" />
       <CalendarDataContext.Provider value={{ monthData, activeMonth: activeDate, setActiveMonth: setActiveDate, startKey, endKey }}>
-      <div className="w-full flex flex-col gap-2 items-center">
-        <div className="w-full">
-          <Calendar
-            mode="single"
-            month={activeDate}
-            onMonthChange={setActiveDate}
-            disabled={(date) => date < CALENDAR_START_DATE || date > CALENDAR_END_DATE}
-            showOutsideDays
-            className="w-full rounded-2xl border-2 border-[#99ab86] p-0"
-            classNames={{
-              months: "w-full",
-              month: "w-full flex flex-col gap-0",
-              month_caption: "flex w-full items-center justify-center border-b border-[#99ab86]",
-              weekdays: "flex w-full bg-[#E4E4CC] border-b border-[#99ab86]",
-              weekday: "flex-1 text-center text-xs font-bold py-2 capitalize",
-              week: "flex w-full border-b border-[#99ab86] last:border-b-0",
-              day: "group/day relative flex-1 border-r border-[#99ab86] last:border-r-0 p-0 select-none",
-              today: "bg-[#c3d4a8]",
-              outside: "",
-              disabled: "opacity-30",
-            }}
-            components={{
-              DayButton: PanchangamDayButton,
-              MonthCaption: PanchangamMonthCaption,
-              Nav: () => <></>,
-            }}
-          />
-          <div className="grid grid-flow-rows auto-rows-min my-2 gap-1">
-            {monthEvents.map((event, idx) => (
-              <div
-                key={idx}
-                className="flex flex-row items-center gap-4 border-b border-amber-800/20 px-2 py-2 last:border-b-0 text-amber-800 font-semibold font-inter text-xs md:text-sm"
-              >
-                <p>{event.dt.getDate()}</p>
-                <p>{event.e.name}</p>
-                <HoverCard openDelay={150} closeDelay={50}>
-                  <HoverCardTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={`${event.e.name} details`}
-                      className="text-amber-800/70 hover:text-amber-800"
-                    >
-                      <InfoIcon className="h-4 w-4" />
-                    </button>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-72">
-                    <p className="font-playfair-display font-bold text-amber-800">{event.e.name}</p>
-                    <p className="mt-1 font-inter text-xs font-normal text-muted-foreground md:text-sm">
-                      {event.e.description}
-                    </p>
-                  </HoverCardContent>
-                </HoverCard>
-              </div>
-            ))}
+        <div className="w-full flex flex-col gap-2 items-center">
+          <div className="w-full">
+            <Calendar
+              mode="single"
+              month={activeDate}
+              onMonthChange={setActiveDate}
+              disabled={(date) => date < CALENDAR_START_DATE || date > CALENDAR_END_DATE}
+              showOutsideDays
+              className="w-full max-w-full overflow-hidden rounded-2xl border-2 border-[#99ab86] p-0"
+              classNames={{
+                months: "w-full",
+                month: "w-full flex flex-col gap-0",
+                month_caption: "flex w-full items-center justify-center border-b border-[#99ab86]",
+                // grid-cols-7 (repeat(7, minmax(0, 1fr))) rather than flex — the
+                // explicit 0 track minimum makes every column truly equal-width
+                // regardless of content, instead of fighting per-item min-width.
+                weekdays: "grid grid-cols-7 bg-[#E4E4CC] border-b border-[#99ab86]",
+                weekday: "overflow-hidden text-center text-xs font-bold py-2 capitalize",
+                week: "grid grid-cols-7 border-b border-[#99ab86] last:border-b-0",
+                day: "group/day relative overflow-hidden border-r border-[#99ab86] last:border-r-0 p-0 select-none",
+                today: "bg-[#c3d4a8]",
+                outside: "",
+                disabled: "opacity-30",
+              }}
+              components={{
+                DayButton: PanchangamDayButton,
+                MonthCaption: PanchangamMonthCaption,
+                Nav: () => <></>,
+              }}
+            />
+            <div className="grid grid-flow-rows auto-rows-min my-2 gap-1">
+              {monthEvents.map((event, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-row items-center gap-4 border-b border-amber-800/20 px-2 py-2 last:border-b-0 text-amber-800 font-semibold font-inter text-xs md:text-sm"
+                >
+                  <p>{event.dt.getDate()}</p>
+                  <p>{event.e.name}</p>
+                  <HoverCard openDelay={150} closeDelay={50}>
+                    <HoverCardTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={`${event.e.name} details`}
+                        className="text-amber-800/70 hover:text-amber-800"
+                      >
+                        <InfoIcon className="h-4 w-4" />
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-72">
+                      <p className="font-playfair-display font-bold text-amber-800">{event.e.name}</p>
+                      <p className="mt-1 font-inter text-xs font-normal text-muted-foreground md:text-sm">
+                        {event.e.description}
+                      </p>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
       </CalendarDataContext.Provider>
     </div>
   )
