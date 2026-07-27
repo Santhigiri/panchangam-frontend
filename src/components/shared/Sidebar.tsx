@@ -1,5 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Star, Settings, Menu, X, type LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Home, Calendar, Menu, X, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
 type NavItemProps = {
