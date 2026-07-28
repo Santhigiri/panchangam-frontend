@@ -5,12 +5,15 @@ import viteTsConfigPaths from "vite-tsconfig-paths"
 import tanstackRouter from '@tanstack/router-plugin/vite'
 import tailwindcss from "@tailwindcss/vite"
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 const config = defineConfig({
   plugins: [
     devtools(),
-    // this is the plugin that enables path aliases
-    tanstackRouter(),
+    // this is the plugin that enables path aliases.
+    // autoCodeSplitting splits each route's component into its own lazy chunk
+    // so the home route no longer ships the /calendar and /data feature code.
+    tanstackRouter({ autoCodeSplitting: true }),
     viteTsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
@@ -72,7 +75,12 @@ const config = defineConfig({
         ]
       }
 
-    })
+    }),
+    // Bundle-composition treemap, only when explicitly measuring
+    // (ANALYZE=1 npm run build) — never affects normal builds.
+    ...(process.env.ANALYZE
+      ? [visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: true })]
+      : []),
   ],
 })
 
