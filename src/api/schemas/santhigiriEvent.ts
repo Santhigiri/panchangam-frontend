@@ -41,3 +41,32 @@ export const santhigiriEventOccurrences = z.object({
 })
 
 export type SanthigiriEventOccurrences = z.infer<typeof santhigiriEventOccurrences>
+
+export const santhigiriEventGenerateProgress = z.object({
+  type: z.literal("progress"),
+  year: z.number().int(),
+  count: z.number().int(),
+  completed: z.number().int(),
+  total: z.number().int(),
+  percent: z.number(),
+  elapsed_seconds: z.number(),
+})
+
+export type SanthigiriEventGenerateProgress = z.infer<typeof santhigiriEventGenerateProgress>
+
+export const santhigiriEventGenerateResult = santhigiriEventOccurrences.extend({
+  type: z.literal("complete"),
+})
+
+export type SanthigiriEventGenerateResult = z.infer<typeof santhigiriEventGenerateResult>
+
+export const santhigiriEventGenerateError = z.object({
+  type: z.literal("error"),
+  detail: z.string(),
+})
+
+export const santhigiriEventGenerateLine = z.discriminatedUnion("type", [
+  santhigiriEventGenerateProgress,
+  santhigiriEventGenerateResult,
+  santhigiriEventGenerateError,
+])

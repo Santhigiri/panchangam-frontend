@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { SanthigiriEventFormValues } from "@/api/schemas/santhigiriEvent"
+import type {
+  SanthigiriEventFormValues,
+  SanthigiriEventGenerateProgress,
+} from "@/api/schemas/santhigiriEvent"
 import {
   createSanthigiriEvent,
   deleteSanthigiriEvent,
@@ -44,7 +47,9 @@ export function useUpdateSanthigiriEvent() {
   })
 }
 
-export function useGenerateSanthigiriEventOccurrences() {
+export function useGenerateSanthigiriEventOccurrences(
+  onProgress?: (progress: SanthigiriEventGenerateProgress) => void
+) {
   return useMutation({
     mutationFn: ({
       eventId,
@@ -55,7 +60,13 @@ export function useGenerateSanthigiriEventOccurrences() {
       startYear: number
       endYear: number
     }) =>
-      generateSanthigiriEventOccurrences(eventId, startYear, endYear, requireAccessToken()),
+      generateSanthigiriEventOccurrences(
+        eventId,
+        startYear,
+        endYear,
+        requireAccessToken(),
+        onProgress
+      ),
   })
 }
 
