@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Home, Calendar, Database, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "@/components/shared/LoginDialog";
@@ -25,8 +25,14 @@ export default function Sidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { isAuthenticated, username, role, logout } = useAuth();
   const { isMobileMenuOpen, closeMobileMenu } = useMobileSidebar();
+  const navigate = useNavigate();
   const navItems = role === "admin" ? [...baseNavItems, ...adminNavItems] : baseNavItems;
   const showLabels = !isCollapsed || isMobileMenuOpen;
+
+  function handleLogout() {
+    logout();
+    navigate({ to: "/" });
+  }
 
   return (
     <>
@@ -97,7 +103,7 @@ export default function Sidebar() {
           {isAuthenticated ? (
             <button
               type="button"
-              onClick={logout}
+              onClick={handleLogout}
               className={`
                   flex w-full items-center justify-start gap-3 appearance-none px-4 py-3 rounded-md
                   transition-colors hover:bg-amber-800 hover:text-accent-foreground
