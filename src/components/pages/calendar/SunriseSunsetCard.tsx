@@ -16,8 +16,8 @@ export default function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProp
         <CardContent className="flex flex-row items-center gap-4 px-4">
           <SunriseIcon />
           <div className="flex flex-col">
-            <p className="font-inter text-[#554336] text-[12px] font-semibold">SUNRISE</p>
-            <p className="font-inter text-[#554336] text-[12px]">{getFormattedTime(sunrise)}</p>
+            <p className="font-inter text-muted-foreground text-[12px] font-semibold">SUNRISE</p>
+            <p className="font-inter text-muted-foreground text-[12px]">{getFormattedTime(sunrise)}</p>
           </div>
         </CardContent>
       </Card>
@@ -25,8 +25,8 @@ export default function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProp
         <CardContent className="flex flex-row items-center gap-4 px-4">
           <SunsetIcon />
           <div className="flex flex-col">
-            <p className="font-inter text-[#554336] text-[12px] font-semibold">SUNSET</p>
-            <p className="font-inter text-[#554336] text-[12px]">{getFormattedTime(sunset)}</p>
+            <p className="font-inter text-muted-foreground text-[12px] font-semibold">SUNSET</p>
+            <p className="font-inter text-muted-foreground text-[12px]">{getFormattedTime(sunset)}</p>
           </div>
         </CardContent>
       </Card>

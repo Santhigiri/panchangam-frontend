@@ -17,7 +17,7 @@ import { useHomePanchangam } from "@/hooks/homepage/useHomePanchangam";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-// Selected takes the color today used to have (amber-700) and today takes
+// Selected takes the color today used to have (secondary) and today takes
 // the color selected used to have (the primary saffron) — inverted on
 // purpose so the two states read distinctly from each other.
 function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<typeof DayButton>) {
@@ -31,7 +31,7 @@ function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<
     <CalendarDayButton
       modifiers={modifiers}
       className={cn(
-        "data-[selected-single=true]:bg-amber-700 data-[selected-single=true]:text-white",
+        "data-[selected-single=true]:bg-secondary data-[selected-single=true]:text-secondary-foreground",
         className
       )}
       {...props}

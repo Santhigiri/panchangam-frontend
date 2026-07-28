@@ -41,7 +41,7 @@ export const RefreshPrompt = () => {
     <Card className="fixed bottom-10 right-4 shadow-lg w-48">
       <CardContent className="pt-4 flex flex-col gap-2">
         <p className="text-sm">New update available!</p>
-        <Button size="sm" onClick={reloadPage} className="bg-[#8F4E00] hover:opacity-70">
+        <Button size="sm" onClick={reloadPage}>
           Refresh
         </Button>
       </CardContent>
