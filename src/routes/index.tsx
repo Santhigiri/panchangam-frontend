@@ -6,8 +6,8 @@ export const Route = createFileRoute("/")({ component: App });
 function App() {
 
   return (
-    <div className="flex min-h-screen  p-2 bg-[#F5F5DC]">
-      <div className="w-full flex-1 gap-4">
+    <div className="flex bg-[#F5F5DC]">
+      <div className="w-full">
         <DayDetailsPage />
       </div>
     </div>

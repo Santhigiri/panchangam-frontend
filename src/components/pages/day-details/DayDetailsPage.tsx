@@ -87,14 +87,14 @@ export default function DayDetailsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 justify-items-stretch gap-4 p-2">
+      <div className="grid grid-cols-2 justify-items-stretch gap-2">
 
         {activeDateData && (
           <>
             <div className="col-span-2">
               <div className="flex flex-row justify-center items-center">
                 <ChevronLeft
-                  className="w-12 h-12 cursor-pointer"
+                  className="w-8 h-8 cursor-pointer"
                   onClick={() => setActiveDate(addDays(activeDate, -1))}
                 />
                 <div className="flex-1">
@@ -104,7 +104,7 @@ export default function DayDetailsPage() {
                   />
                 </div>
                 <ChevronRight
-                  className="w-12 h-12 cursor-pointer"
+                  className="w-8 h-8 cursor-pointer"
                   onClick={() => setActiveDate(addDays(activeDate, 1))}
                 />
               </div>
@@ -113,7 +113,7 @@ export default function DayDetailsPage() {
               <GuruvaniCard />
             </div>
 
-            <div className="col-span-2 m-2">
+            <div className="col-span-2">
               <SunriseSunsetCard
                 sunrise={activeDateData.sunrise}
                 sunset={activeDateData.sunset}

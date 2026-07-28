@@ -10,7 +10,7 @@ export type UpcomingEventsCardProps = {
 
 export default function UpcomingEventsCard({ events }: UpcomingEventsCardProps) {
   return (
-    <Card className="border-l-4 border-l-amber-900 rounded-md m-2 gap-0">
+    <Card className="border-l-4 border-l-amber-900 rounded-md py-3 gap-0">
       <CardHeader className="pb-2">
         <p className="font-semibold text-xs text-[#554336]">UPCOMING EVENTS</p>
       </CardHeader>
