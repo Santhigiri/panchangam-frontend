@@ -10,9 +10,9 @@ export type UpcomingEventsCardProps = {
 
 export default function UpcomingEventsCard({ events }: UpcomingEventsCardProps) {
   return (
-    <Card className="border-l-4 border-l-amber-900 rounded-md py-3 gap-0">
+    <Card className="border-l-4 border-l-primary rounded-md py-3 gap-0">
       <CardHeader className="pb-2">
-        <p className="font-semibold text-xs text-[#554336]">UPCOMING EVENTS</p>
+        <p className="font-semibold text-xs text-muted-foreground">UPCOMING EVENTS</p>
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         {events.length === 0 && (
@@ -23,7 +23,7 @@ export default function UpcomingEventsCard({ events }: UpcomingEventsCardProps) 
         {events.map(({ date, event }, idx) => (
           <div
             key={idx}
-            className="flex flex-row items-center gap-3 border-b border-amber-800/20 py-2 last:border-b-0 text-amber-800 font-semibold font-inter text-xs md:text-sm"
+            className="flex flex-row items-center gap-3 border-b border-primary/20 py-2 last:border-b-0 text-primary font-semibold font-inter text-xs md:text-sm"
           >
             <p className="shrink-0">{format(date, "MMM d")}</p>
             <p className="truncate">{event.name}</p>
@@ -32,13 +32,13 @@ export default function UpcomingEventsCard({ events }: UpcomingEventsCardProps) 
                 <button
                   type="button"
                   aria-label={`${event.name} details`}
-                  className="ml-auto shrink-0 text-amber-800/70 hover:text-amber-800"
+                  className="ml-auto shrink-0 text-primary/70 hover:text-primary"
                 >
                   <InfoIcon className="h-4 w-4" />
                 </button>
               </HoverCardTrigger>
               <HoverCardContent className="w-72">
-                <p className="font-playfair-display font-bold text-amber-800">{event.name}</p>
+                <p className="font-playfair-display font-bold text-primary">{event.name}</p>
                 <p className="mt-1 font-inter text-xs font-normal text-muted-foreground md:text-sm">
                   {event.description}
                 </p>

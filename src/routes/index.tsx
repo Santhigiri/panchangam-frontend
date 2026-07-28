@@ -6,7 +6,7 @@ export const Route = createFileRoute("/")({ component: App });
 function App() {
 
   return (
-    <div className="flex bg-[#F5F5DC]">
+    <div className="flex bg-card">
       <div className="w-full">
         <DayDetailsPage />
       </div>
