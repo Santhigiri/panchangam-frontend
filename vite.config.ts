@@ -31,7 +31,7 @@ const config = defineConfig({
         // here: that would take precedence over this fallback and always
         // force a network request, defeating it.
         navigateFallback: 'index.html',
-        globPatterns: ['**/*.{js,css,ico,png,svg,html}'],
+        globPatterns: ['**/*.{js,css,ico,png,svg,html,woff,woff2}'],
         globDirectory: 'dist',
         // Without this, an activating SW never takes control of the tab
         // that's already open (only future navigations get controlled) — so
