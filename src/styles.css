@@ -2,14 +2,15 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/playfair-display";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-playfair-display);
-    --font-sans: 'Inter', sans-serif;
-    --font-playfair-display: 'Playfair Display', serif;
-    --font-inter: 'Inter', sans-serif;
+    --font-sans: 'Inter Variable', 'Inter', sans-serif;
+    --font-playfair-display: 'Playfair Display Variable', 'Playfair Display', serif;
+    --font-inter: 'Inter Variable', 'Inter', sans-serif;
     
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
