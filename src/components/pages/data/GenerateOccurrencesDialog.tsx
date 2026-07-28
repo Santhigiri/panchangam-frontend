@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
-import type { SanthigiriEvent } from "@/api/schemas/santhigiriEvent"
+import { Copy } from "lucide-react"
+import { toast } from "sonner"
+import type {
+  SanthigiriEvent,
+  SanthigiriEventGenerateProgress,
+} from "@/api/schemas/santhigiriEvent"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -39,7 +45,8 @@ export function GenerateOccurrencesDialog({
 }: GenerateOccurrencesDialogProps) {
   const [startYear, setStartYear] = useState(() => new Date().getFullYear())
   const [endYear, setEndYear] = useState(() => new Date().getFullYear())
-  const generateMutation = useGenerateSanthigiriEventOccurrences()
+  const [progress, setProgress] = useState<SanthigiriEventGenerateProgress | null>(null)
+  const generateMutation = useGenerateSanthigiriEventOccurrences(setProgress)
 
   const { reset: resetGenerateMutation } = generateMutation
   useEffect(() => {
@@ -47,12 +54,24 @@ export function GenerateOccurrencesDialog({
       const currentYear = new Date().getFullYear()
       setStartYear(currentYear)
       setEndYear(currentYear)
+      setProgress(null)
       resetGenerateMutation()
     }
   }, [event, resetGenerateMutation])
 
   const rangeInvalid = endYear < startYear
   const rangeTooLarge = !rangeInvalid && endYear - startYear + 1 > MAX_YEAR_SPAN
+
+  const handleCopyDates = () => {
+    if (!generateMutation.data) return
+    const text = Object.entries(generateMutation.data.occurrences)
+      .flatMap(([, dates]) => dates)
+      .sort()
+      .map((date) => format(new Date(date), "d MMMM yyyy"))
+      .join("\n")
+    navigator.clipboard.writeText(text)
+    toast.success("Occurrence dates copied to clipboard")
+  }
 
   return (
     <Dialog open={event !== null} onOpenChange={(next) => !next && onOpenChange(false)}>
@@ -109,6 +128,15 @@ export function GenerateOccurrencesDialog({
           <FieldError>Year range too large (max {MAX_YEAR_SPAN} years).</FieldError>
         )}
 
+        {generateMutation.isPending && progress && (
+          <div className="flex flex-col gap-1">
+            <Progress value={progress.percent} />
+            <span className="text-sm text-muted-foreground">
+              {progress.completed}/{progress.total} years ({progress.year})
+            </span>
+          </div>
+        )}
+
         {generateMutation.isSuccess && (
           <div className="max-h-64 overflow-y-auto text-sm text-foreground">
             {Object.entries(generateMutation.data.occurrences).map(([year, dates]) => (
@@ -137,14 +165,27 @@ export function GenerateOccurrencesDialog({
         )}
 
         <DialogFooter>
-          <Button
-            disabled={!event || generateMutation.isPending || rangeInvalid || rangeTooLarge}
-            onClick={() => {
-              if (event) generateMutation.mutate({ eventId: event.id, startYear, endYear })
-            }}
-          >
-            {generateMutation.isPending ? "Generating..." : "Generate"}
-          </Button>
+          {generateMutation.isSuccess ? (
+            <>
+              <Button variant="outline" onClick={handleCopyDates}>
+                <Copy />
+                Copy dates
+              </Button>
+              <Button onClick={() => onOpenChange(false)}>Close</Button>
+            </>
+          ) : (
+            <Button
+              disabled={!event || generateMutation.isPending || rangeInvalid || rangeTooLarge}
+              onClick={() => {
+                if (event) {
+                  setProgress(null)
+                  generateMutation.mutate({ eventId: event.id, startYear, endYear })
+                }
+              }}
+            >
+              {generateMutation.isPending ? "Generating..." : "Generate"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
