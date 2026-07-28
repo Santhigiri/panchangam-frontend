@@ -77,9 +77,26 @@ type FormState = {
   en_month: string
   en_year: string
   occurance: string
-  is_poornima: boolean
-  last_occurance: boolean
+  is_poornima: boolean | null
+  last_occurance: boolean | null
   yields_to_event_id: string
+}
+
+/**
+ * is_poornima/last_occurance are tri-state on the wire (null = not a
+ * criterion, true/false = an explicit constraint) — cycle null -> true ->
+ * false -> null so the UI can produce and preserve all three instead of
+ * collapsing an unset value to false.
+ */
+function cycleTriState(current: boolean | null): boolean | null {
+  if (current === null) return true
+  if (current === true) return false
+  return null
+}
+
+function triStateLabel(value: boolean | null): string {
+  if (value === null) return "Not a criterion"
+  return value ? "Must match" : "Must not match"
 }
 
 const EMPTY_FORM: FormState = {
@@ -96,8 +113,8 @@ const EMPTY_FORM: FormState = {
   en_month: "",
   en_year: "",
   occurance: "",
-  is_poornima: false,
-  last_occurance: false,
+  is_poornima: null,
+  last_occurance: null,
   yields_to_event_id: "",
 }
 
@@ -116,8 +133,8 @@ function toFormState(event: SanthigiriEventDetail): FormState {
     en_month: event.en_month?.toString() ?? "",
     en_year: event.en_year?.toString() ?? "",
     occurance: event.occurance?.toString() ?? "",
-    is_poornima: event.is_poornima ?? false,
-    last_occurance: event.last_occurance ?? false,
+    is_poornima: event.is_poornima ?? null,
+    last_occurance: event.last_occurance ?? null,
     yields_to_event_id: event.yields_to_event_id ?? "",
   }
 }
@@ -386,24 +403,32 @@ export function EventFormDialog({
               />
             </Field>
 
-            <div className="flex flex-wrap items-center gap-6">
+            <Field>
               <FieldLabel htmlFor="event-is-poornima" className="flex-row items-center gap-2">
                 <Checkbox
                   id="event-is-poornima"
-                  checked={form.is_poornima}
-                  onCheckedChange={(checked) => set("is_poornima", checked === true)}
+                  checked={form.is_poornima === null ? "indeterminate" : form.is_poornima}
+                  onCheckedChange={() => set("is_poornima", cycleTriState(form.is_poornima))}
                 />
                 Is Poornima
+                <span className="text-muted-foreground text-xs">
+                  ({triStateLabel(form.is_poornima)})
+                </span>
               </FieldLabel>
+            </Field>
+            <Field>
               <FieldLabel htmlFor="event-last-occurance" className="flex-row items-center gap-2">
                 <Checkbox
                   id="event-last-occurance"
-                  checked={form.last_occurance}
-                  onCheckedChange={(checked) => set("last_occurance", checked === true)}
+                  checked={form.last_occurance === null ? "indeterminate" : form.last_occurance}
+                  onCheckedChange={() => set("last_occurance", cycleTriState(form.last_occurance))}
                 />
                 Last occurrence
+                <span className="text-muted-foreground text-xs">
+                  ({triStateLabel(form.last_occurance)})
+                </span>
               </FieldLabel>
-            </div>
+            </Field>
 
             {error && <FieldError>{error}</FieldError>}
 
