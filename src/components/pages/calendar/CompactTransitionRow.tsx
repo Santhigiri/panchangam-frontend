@@ -20,9 +20,9 @@ export function CompactTransitionRow({
   isCurrent,
 }: CompactTransitionRowProps) {
   return (
-    <Card className={cn("rounded-md py-2", isCurrent && "bg-amber-100 border-amber-300")}>
+    <Card className={cn("rounded-md py-2", isCurrent && "bg-primary/10 border-primary/30")}>
       <CardContent className="flex flex-row items-center gap-3 px-3">
-        <Icon className="h-5 w-5 text-amber-700 shrink-0" />
+        <Icon className="h-5 w-5 text-primary shrink-0" />
         <div className="flex flex-col min-w-0">
           <p className="text-sm font-medium font-playfair-display truncate">
             {value}

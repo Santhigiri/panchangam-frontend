@@ -49,7 +49,7 @@ function DayDetailsHoverContent({ date, data }: { date: Date; data: PanchangamDa
     <div className="flex flex-col gap-2">
       <DateHeader date={date} kv_date={data.kv} />
       <Separator />
-      <div className="flex flex-row justify-between text-xs font-inter text-[#554336]">
+      <div className="flex flex-row justify-between text-xs font-inter text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <SunriseIcon className="h-3.5 w-3.5" />
           {getFormattedTime(data.sunrise)}
@@ -68,7 +68,7 @@ function DayDetailsHoverContent({ date, data }: { date: Date; data: PanchangamDa
           <Separator />
           <div className="flex flex-col gap-1">
             {data.santhigiri_significant_dates.map((significance) => (
-              <p key={significance.name} className="text-xs font-semibold text-amber-800">
+              <p key={significance.name} className="text-xs font-semibold text-primary">
                 {significance.name}
               </p>
             ))}
@@ -102,7 +102,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       onClick={(e) => e.preventDefault()}
     >
       {dateData?.kv.kv_day === 1 ? (
-        <p className="bg-amber-700 text-[8px] lg:text-[12px] font-bold text-orange-50 w-full text-center leading-snug break-words">
+        <p className="bg-primary text-[8px] lg:text-[12px] font-bold text-primary-foreground w-full text-center leading-snug break-words">
           {dateData.kv.kv_month_name_ml}
         </p>
       ) : (
@@ -149,7 +149,7 @@ function PanchangamMonthCaption({ calendarMonth }: { calendarMonth: { date: Date
           aria-label="Previous month"
           disabled={!canGoPrevious}
           onClick={() => ctx?.setActiveMonth(previousMonth)}
-          className="text-amber-800 hover:text-amber-800 [&_svg]:size-6"
+          className="text-primary hover:text-primary [&_svg]:size-6"
         >
           <ChevronLeft />
         </Button>
@@ -162,7 +162,7 @@ function PanchangamMonthCaption({ calendarMonth }: { calendarMonth: { date: Date
           >
             <SelectTrigger
               aria-label="Month"
-              className="h-auto gap-1 border-none bg-transparent p-0 text-lg font-bold text-amber-800 shadow-none hover:bg-transparent focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent [&_svg]:text-amber-800"
+              className="h-auto gap-1 border-none bg-transparent p-0 text-lg font-bold text-primary shadow-none hover:bg-transparent focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent [&_svg]:text-primary"
             >
               <SelectValue />
             </SelectTrigger>
@@ -182,7 +182,7 @@ function PanchangamMonthCaption({ calendarMonth }: { calendarMonth: { date: Date
           >
             <SelectTrigger
               aria-label="Year"
-              className="h-auto gap-1 border-none bg-transparent p-0 text-lg font-bold text-amber-800 shadow-none hover:bg-transparent focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent [&_svg]:text-amber-800"
+              className="h-auto gap-1 border-none bg-transparent p-0 text-lg font-bold text-primary shadow-none hover:bg-transparent focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent [&_svg]:text-primary"
             >
               <SelectValue />
             </SelectTrigger>
@@ -201,7 +201,7 @@ function PanchangamMonthCaption({ calendarMonth }: { calendarMonth: { date: Date
           aria-label="Next month"
           disabled={!canGoNext}
           onClick={() => ctx?.setActiveMonth(nextMonth)}
-          className="text-amber-800 hover:text-amber-800 [&_svg]:size-6"
+          className="text-primary hover:text-primary [&_svg]:size-6"
         >
           <ChevronRight />
         </Button>
@@ -229,7 +229,7 @@ export default function CalendarCustomDays() {
       <div className="flex flex-col items-stretch">
         <TopAppBar title="Calendar" />
         <div className="flex items-center justify-center h-full">
-          <div className="w-8 h-8 border-4 border-amber-700 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
@@ -247,19 +247,19 @@ export default function CalendarCustomDays() {
               onMonthChange={setActiveDate}
               disabled={(date) => date < CALENDAR_START_DATE || date > CALENDAR_END_DATE}
               showOutsideDays
-              className="w-full max-w-full overflow-hidden rounded-2xl border-2 border-[#99ab86] p-0"
+              className="w-full max-w-full overflow-hidden rounded-2xl border-2 border-border p-0"
               classNames={{
                 months: "w-full",
                 month: "w-full flex flex-col gap-0",
-                month_caption: "flex w-full items-center justify-center border-b border-[#99ab86]",
+                month_caption: "flex w-full items-center justify-center border-b border-border",
                 // grid-cols-7 (repeat(7, minmax(0, 1fr))) rather than flex — the
                 // explicit 0 track minimum makes every column truly equal-width
                 // regardless of content, instead of fighting per-item min-width.
-                weekdays: "grid grid-cols-7 bg-[#E4E4CC] border-b border-[#99ab86]",
+                weekdays: "grid grid-cols-7 bg-muted border-b border-border",
                 weekday: "overflow-hidden text-center text-xs font-bold py-1 capitalize",
-                week: "grid grid-cols-7 border-b border-[#99ab86] last:border-b-0",
-                day: "group/day relative overflow-hidden border-r border-[#99ab86] last:border-r-0 p-0 select-none",
-                today: "bg-[#c3d4a8]",
+                week: "grid grid-cols-7 border-b border-border last:border-b-0",
+                day: "group/day relative overflow-hidden border-r border-border last:border-r-0 p-0 select-none",
+                today: "bg-primary/15",
                 outside: "",
                 disabled: "opacity-30",
               }}
@@ -274,7 +274,7 @@ export default function CalendarCustomDays() {
                 {monthEvents.map((event, idx) => (
                   <div
                     key={idx}
-                    className="flex flex-row items-center gap-4 border-b border-amber-800/20 px-2 py-1.5 last:border-b-0 text-amber-800 font-semibold font-inter text-xs md:text-sm"
+                    className="flex flex-row items-center gap-4 border-b border-primary/20 px-2 py-1.5 last:border-b-0 text-primary font-semibold font-inter text-xs md:text-sm"
                   >
                     <p>{event.dt.getDate()}</p>
                     <p>{event.e.name}</p>
@@ -283,13 +283,13 @@ export default function CalendarCustomDays() {
                         <button
                           type="button"
                           aria-label={`${event.e.name} details`}
-                          className="text-amber-800/70 hover:text-amber-800"
+                          className="text-primary/70 hover:text-primary"
                         >
                           <InfoIcon className="h-4 w-4" />
                         </button>
                       </HoverCardTrigger>
                       <HoverCardContent className="w-72">
-                        <p className="font-playfair-display font-bold text-amber-800">{event.e.name}</p>
+                        <p className="font-playfair-display font-bold text-primary">{event.e.name}</p>
                         <p className="mt-1 font-inter text-xs font-normal text-muted-foreground md:text-sm">
                           {event.e.description}
                         </p>
