@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { Copy } from "lucide-react"
 import { toast } from "sonner"
 import type {
@@ -67,7 +67,7 @@ export function GenerateOccurrencesDialog({
     const text = Object.entries(generateMutation.data.occurrences)
       .flatMap(([, dates]) => dates)
       .sort()
-      .map((date) => format(new Date(date), "d MMMM yyyy"))
+      .map((date) => format(parseISO(date), "d MMMM yyyy"))
       .join("\n")
     navigator.clipboard.writeText(text)
     toast.success("Occurrence dates copied to clipboard")
@@ -147,7 +147,7 @@ export function GenerateOccurrencesDialog({
                 {dates.length > 0 && (
                   <ul className="list-inside list-disc text-muted-foreground">
                     {dates.map((date) => (
-                      <li key={date}>{format(new Date(date), "d MMMM yyyy")}</li>
+                      <li key={date}>{format(parseISO(date), "d MMMM yyyy")}</li>
                     ))}
                   </ul>
                 )}
