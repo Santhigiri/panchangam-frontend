@@ -23,16 +23,12 @@ export const RefreshPrompt = () => {
 
   const reloadPage = () => {
     setNeedRefresh(false);
-    if ('caches' in window) {
-      caches.keys().then((cacheNames) => {
-        cacheNames.forEach((cacheName) => {
-          if (cacheName.startsWith('workbox-') || cacheName.startsWith('cache-')) {
-            caches.delete(cacheName);
-          }
-        });
-        updateServiceWorker(true);
-      });
-    }
+    // Hand off to the waiting service worker (skipWaiting) and reload. The new
+    // SW repopulates the precache on activation and Workbox drops outdated
+    // precache entries itself — so we must NOT delete the workbox precache here.
+    // Doing so wiped the offline app shell and left the next offline open
+    // failing with ERR_FAILED.
+    updateServiceWorker(true);
   };
 
   if (!needRefresh) return null;
