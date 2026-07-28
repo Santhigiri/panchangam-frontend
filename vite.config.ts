@@ -26,6 +26,10 @@ const config = defineConfig({
         navigateFallback: 'index.html'
       },
       strategies: 'generateSW',
+      // Prompt strategy: a new SW waits until the user taps Refresh
+      // (RefreshPrompt) before taking over, so updates never swap the app out
+      // from under an in-progress session.
+      registerType: 'prompt',
       workbox: {
         sourcemap: true,
         // Precached index.html served for any navigation the network can't
@@ -35,7 +39,9 @@ const config = defineConfig({
         // force a network request, defeating it.
         navigateFallback: 'index.html',
         globPatterns: ['**/*.{js,css,ico,png,svg,html,woff,woff2}'],
-        globDirectory: 'dist',
+        // globDirectory is intentionally left to vite-plugin-pwa, which points
+        // it at Vite's resolved build outDir. Hardcoding it here risked the
+        // precache manifest globbing the wrong path.
         // Without this, an activating SW never takes control of the tab
         // that's already open (only future navigations get controlled) — so
         // testing offline right after the very first visit fails even
@@ -48,7 +54,6 @@ const config = defineConfig({
       },
       includeAssets: [
         "favicon.ico",
-        "apple-touch-icon.png",
       ],
 
       manifest: {
