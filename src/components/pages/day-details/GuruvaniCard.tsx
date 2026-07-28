@@ -5,8 +5,8 @@ export default function GuruvaniCard() {
   const { data, isLoading, isError } = useRandomGuruvani()
 
   return (
-    <Card className="border-l-4 border-l-amber-900 rounded-md m-2">
-      <CardContent className="flex flex-col gap-1 py-3 px-4">
+    <Card className="border-l-4 border-l-amber-900 rounded-md py-3">
+      <CardContent className="flex flex-col gap-1 px-4">
         <p className="font-semibold text-xs text-[#554336]">GURUVANI</p>
         {isLoading && (
           <p className="font-inter text-xs text-muted-foreground">Loading...</p>
