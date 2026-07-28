@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { queryClient } from "@/lib/query-client"
 import { RefreshPrompt } from "@/components/shared/RefreshPrompt"
 import Sidebar from "@/components/shared/Sidebar"
+import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/hooks/useAuth"
 import { MobileSidebarProvider } from "@/hooks/useMobileSidebar"
 
@@ -58,6 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <HeadContent />
           {children}
           <RefreshPrompt />
+          <Toaster />
         </MobileSidebarProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -55,8 +55,14 @@ export default function PanchangamTab() {
     },
   })
 
+  // The backend's monthly endpoint can include a few days that spill outside
+  // the requested Gregorian month (e.g. Malayalam-calendar boundary days) —
+  // keep only rows whose date actually falls within the selected month.
+  const activeMonthPrefix = format(activeMonth, "yyyy-MM")
   const rows = monthData
-    ? Object.values(monthData).sort((a, b) => a.date.localeCompare(b.date))
+    ? Object.values(monthData)
+        .filter((day) => day.date.startsWith(activeMonthPrefix))
+        .sort((a, b) => a.date.localeCompare(b.date))
     : []
 
   return (

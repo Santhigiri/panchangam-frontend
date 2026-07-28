@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Calendar, Database, Menu, X, LogIn, type LucideIcon, LogInIcon } from "lucide-react";
+import { Home, Calendar, Database, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "@/components/shared/LoginDialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,16 +56,18 @@ export default function Sidebar() {
         <div className="p-4 border-b border-amber-700 flex items-center justify-between">
           {/* Desktop icon-only/labeled toggle */}
           <button
+            type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:inline-flex p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
+            className="hidden md:inline-flex appearance-none p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
           >
             {isCollapsed ? <Menu size={20} /> : <X size={20} />}
           </button>
           {/* Mobile drawer close button */}
           <button
+            type="button"
             onClick={closeMobileMenu}
             aria-label="Close menu"
-            className="md:hidden p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
+            className="md:hidden appearance-none p-2 rounded-md hover:bg-amber-700 hover:text-accent-foreground transition-colors"
           >
             <X size={20} />
           </button>
@@ -91,27 +93,29 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="mt-auto p-2 border-t border-amber-700">
+        <div className="w-full mt-auto p-2 border-t border-amber-700">
           {isAuthenticated ? (
             <button
+              type="button"
               onClick={logout}
               className={`
-                  flex items-center gap-3 p-3 m-1 rounded-md
+                  flex w-full items-center justify-start gap-3 appearance-none px-4 py-3 rounded-md
                   transition-colors hover:bg-amber-800 hover:text-accent-foreground
                 `}
             >
-              <LogInIcon size={20} className="min-w-5" />
+              <LogOutIcon size={20} className="min-w-5" />
               {showLabels && <span className="truncate">Log out ({username})</span>}
             </button>
           ) : (
             <button
+              type="button"
               onClick={() => setIsLoginOpen(true)}
               className={`
-                  flex items-center gap-3 px-3 py-3 m-1 rounded-md
+                  flex w-full items-center justify-start gap-3 appearance-none px-4 py-3 rounded-md
                   transition-colors hover:bg-amber-800 hover:text-accent-foreground
                 `}
             >
-              <LogIn size={20} className="min-w-5" />
+              <User size={20} className="min-w-5" />
               {showLabels && <span className="truncate">Log in</span>}
             </button>
           )}

@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { createContext, useContext, useState } from "react"
 import type { ReactNode } from "react"
 import { login as loginRequest } from "@/api/auth"
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUsername(loginUsername)
     setRole(loginRole)
+    toast.success(`Logged in as ${loginUsername}`)
   }
 
   function logout() {
@@ -57,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(ROLE_KEY)
     setUsername(null)
     setRole(null)
+    toast.success("Logged out")
   }
 
   return (
