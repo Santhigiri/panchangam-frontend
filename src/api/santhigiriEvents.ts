@@ -1,5 +1,5 @@
 import { ForbiddenError, UnauthorizedError } from "./panchangamGeneration"
-import { santhigiriEventDetail } from "./schemas/santhigiriEvent"
+import { santhigiriEventDetail, santhigiriEventOccurrences } from "./schemas/santhigiriEvent"
 import type { SanthigiriEventFormValues } from "./schemas/santhigiriEvent"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
@@ -93,6 +93,30 @@ export async function deleteSanthigiriEvent(eventId: string, accessToken: string
   )
 
   await handleErrors(response)
+}
+
+export async function generateSanthigiriEventOccurrences(
+  eventId: string,
+  startYear: number,
+  endYear: number,
+  accessToken: string
+) {
+  const response = await fetch(
+    `${APP_BASE_URL}/api/v1/panchangam/events/${encodeURIComponent(eventId)}/occurrences`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ start_year: startYear, end_year: endYear }),
+    }
+  )
+
+  await handleErrors(response)
+  const json = await response.json()
+  return santhigiriEventOccurrences.parseAsync(json)
 }
 
 export async function getSanthigiriEvent(eventId: string) {

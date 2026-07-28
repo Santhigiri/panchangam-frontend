@@ -24,6 +24,7 @@ export const santhigiriEventDetail = z.object({
   occurance: z.number().int().nullable(),
   is_poornima: z.boolean().nullable(),
   last_occurance: z.boolean().nullable(),
+  yields_to_event_id: z.string().nullable(),
 })
 
 export type SanthigiriEventDetail = z.infer<typeof santhigiriEventDetail>
@@ -31,3 +32,12 @@ export type SanthigiriEventDetail = z.infer<typeof santhigiriEventDetail>
 export type SanthigiriEventFormValues = Omit<SanthigiriEventDetail, "id"> & {
   id: string
 }
+
+export const santhigiriEventOccurrences = z.object({
+  event_id: z.string(),
+  start_year: z.number().int(),
+  end_year: z.number().int(),
+  occurrences: z.record(z.string(), z.array(z.iso.date())),
+})
+
+export type SanthigiriEventOccurrences = z.infer<typeof santhigiriEventOccurrences>
