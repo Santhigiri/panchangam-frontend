@@ -1,0 +1,96 @@
+import * as z from "zod"
+import { ForbiddenError, UnauthorizedError } from "./panchangamGeneration"
+import { guruvani } from "./schemas/guruvani"
+import type { Guruvani, GuruvaniFormValues } from "./schemas/guruvani"
+
+const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "NotFoundError"
+  }
+}
+
+async function parseErrorDetail(response: Response, fallback: string) {
+  try {
+    const body = await response.json()
+    return typeof body.detail === "string" ? body.detail : fallback
+  } catch {
+    return fallback
+  }
+}
+
+async function handleErrors(response: Response) {
+  if (response.status === 401) throw new UnauthorizedError()
+  if (response.status === 403) throw new ForbiddenError()
+  if (response.status === 404) {
+    throw new NotFoundError(await parseErrorDetail(response, "Guruvani not found"))
+  }
+  if (!response.ok) {
+    throw new Error(await parseErrorDetail(response, "Request failed"))
+  }
+}
+
+export async function getGuruvanis(): Promise<Array<Guruvani>> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani`, {
+    headers: { Accept: "application/json" },
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return z.array(guruvani).parseAsync(json)
+}
+
+export async function getRandomGuruvani(): Promise<Guruvani> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani/random`, {
+    headers: { Accept: "application/json" },
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return guruvani.parseAsync(json)
+}
+
+export async function createGuruvani(
+  values: GuruvaniFormValues,
+  accessToken: string
+): Promise<Guruvani> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(values),
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return guruvani.parseAsync(json)
+}
+
+export async function updateGuruvani(
+  id: number,
+  values: GuruvaniFormValues,
+  accessToken: string
+): Promise<Guruvani> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(values),
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return guruvani.parseAsync(json)
+}
+
+export async function deleteGuruvani(id: number, accessToken: string): Promise<void> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  await handleErrors(response)
+}

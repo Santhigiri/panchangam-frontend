@@ -1,4 +1,4 @@
-import ComingSoonTab from "./tabs/ComingSoonTab"
+import GuruvaniTab from "./tabs/GuruvaniTab"
 import NakshatraTab from "./tabs/NakshatraTab"
 import PanchangamTab from "./tabs/PanchangamTab"
 import SanthigiriEventsTab from "./tabs/SanthigiriEventsTab"
@@ -41,7 +41,7 @@ export default function PanchangamDataPage() {
           <SanthigiriEventsTab />
         </TabsContent>
         <TabsContent value="guruvanis">
-          <ComingSoonTab label="Guruvanis" />
+          <GuruvaniTab />
         </TabsContent>
       </Tabs>
     </div>
