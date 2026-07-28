@@ -102,7 +102,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       onClick={(e) => e.preventDefault()}
     >
       {dateData?.kv.kv_day === 1 ? (
-        <p className="bg-amber-700 text-[10px] lg:text-[12px] text-orange-50 w-full text-center leading-snug break-words">
+        <p className="bg-amber-700 text-[8px] lg:text-[12px] font-bold text-orange-50 w-full text-center leading-snug break-words">
           {dateData.kv.kv_month_name_ml}
         </p>
       ) : (
@@ -112,8 +112,8 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
         {day.date.getDate()}
       </p>
       <div className={cn("flex items-baseline justify-between w-full min-w-0 gap-1 pb-1 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
-        <p className="text-[8px] lg:text-[14px] leading-tight text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
-        <p className="text-[8px] lg:text-[14px] leading-tight text-right truncate">{dateData?.nakshatra.ml}</p>
+        <p className="text-[8px] lg:text-[14px] leading-tight font-semibold text-blue-600 shrink-0">{dateData?.kv.kv_day}</p>
+        <p className="text-[8px] lg:text-[14px] leading-tight font-semibold text-right truncate">{dateData?.nakshatra.ml}</p>
       </div>
     </CalendarDayButton>
   )
