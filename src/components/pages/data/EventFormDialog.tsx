@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea"
 import {
   useMasaReference,
   useNakshatraReference,
+  useSanthigiriEvents,
   useThithiReference,
 } from "@/hooks/usePanchangamReference"
 
@@ -40,7 +41,7 @@ function NullableReferenceSelect({
   value: string
   onChange: (value: string) => void
   isLoading: boolean
-  options: Array<{ id: number; label: string }>
+  options: Array<{ id: number | string; label: string }>
 }) {
   return (
     <Select
@@ -78,6 +79,7 @@ type FormState = {
   occurance: string
   is_poornima: boolean
   last_occurance: boolean
+  yields_to_event_id: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -96,6 +98,7 @@ const EMPTY_FORM: FormState = {
   occurance: "",
   is_poornima: false,
   last_occurance: false,
+  yields_to_event_id: "",
 }
 
 function toFormState(event: SanthigiriEventDetail): FormState {
@@ -115,6 +118,7 @@ function toFormState(event: SanthigiriEventDetail): FormState {
     occurance: event.occurance?.toString() ?? "",
     is_poornima: event.is_poornima ?? false,
     last_occurance: event.last_occurance ?? false,
+    yields_to_event_id: event.yields_to_event_id ?? "",
   }
 }
 
@@ -151,6 +155,7 @@ function toFormValues(form: FormState): SanthigiriEventFormValues {
     occurance: toNullableInt(form.occurance),
     is_poornima: form.is_poornima,
     last_occurance: form.last_occurance,
+    yields_to_event_id: form.yields_to_event_id.trim() === "" ? null : form.yields_to_event_id,
   }
 }
 
@@ -175,6 +180,7 @@ export function EventFormDialog({
   const nakshatraReference = useNakshatraReference()
   const thithiReference = useThithiReference()
   const masaReference = useMasaReference()
+  const santhigiriEvents = useSanthigiriEvents()
 
   useEffect(() => {
     if (open) {
@@ -364,6 +370,19 @@ export function EventFormDialog({
                 type="number"
                 value={form.occurance}
                 onChange={(e) => set("occurance", e.target.value)}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="event-yields-to">Yields to</FieldLabel>
+              <NullableReferenceSelect
+                id="event-yields-to"
+                value={form.yields_to_event_id}
+                onChange={(value) => set("yields_to_event_id", value)}
+                isLoading={santhigiriEvents.isLoading}
+                options={(santhigiriEvents.data ?? [])
+                  .filter((e) => e.id !== form.id)
+                  .map((e) => ({ id: e.id, label: e.name }))}
               />
             </Field>
 

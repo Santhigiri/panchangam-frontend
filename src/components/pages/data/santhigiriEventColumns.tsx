@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react"
+import { CalendarPlus, Pencil, Trash2 } from "lucide-react"
 import { SortableHeader } from "./SortableHeader"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { SanthigiriEvent } from "@/api/schemas/santhigiriEvent"
@@ -8,12 +8,14 @@ type BuildColumnsArgs = {
   isAdmin: boolean
   onEdit: (event: SanthigiriEvent) => void
   onDelete: (event: SanthigiriEvent) => void
+  onGenerateOccurrences: (event: SanthigiriEvent) => void
 }
 
 export function buildSanthigiriEventColumns({
   isAdmin,
   onEdit,
   onDelete,
+  onGenerateOccurrences,
 }: BuildColumnsArgs): Array<ColumnDef<SanthigiriEvent>> {
   const columns: Array<ColumnDef<SanthigiriEvent>> = [
     {
@@ -37,6 +39,14 @@ export function buildSanthigiriEventColumns({
       header: "",
       cell: ({ row }) => (
         <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Generate occurrences for ${row.original.name}`}
+            onClick={() => onGenerateOccurrences(row.original)}
+          >
+            <CalendarPlus />
+          </Button>
           <Button
             variant="ghost"
             size="icon-sm"

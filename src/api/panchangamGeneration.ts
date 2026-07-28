@@ -1,7 +1,8 @@
 import { format } from "date-fns"
 import * as z from "zod"
-import { compactPanchangamData, panchangamGenerateResult } from "./schemas/compactPanchangamData"
+import { compactPanchangamData, panchangamGenerateLine } from "./schemas/compactPanchangamData"
 import { fetchWithEtag } from "./conditionalFetch"
+import type { PanchangamGenerateProgress, panchangamGenerateResult } from "./schemas/compactPanchangamData"
 
 const compactPanchangamMonth = z.record(z.string(), compactPanchangamData)
 export type CompactPanchangamMonth = z.infer<typeof compactPanchangamMonth>
@@ -59,11 +60,14 @@ export function getPanchangamYear(
   )
 }
 
+export class PanchangamGenerationError extends Error {}
+
 export async function generatePanchangam(
   startDate: Date,
   endDate: Date,
   location: string,
-  accessToken: string
+  accessToken: string,
+  onProgress?: (progress: PanchangamGenerateProgress) => void
 ) {
   const response = await fetch(
     `${APP_BASE_URL}/api/v1/panchangam/generate?location=${location}`,
@@ -71,7 +75,7 @@ export async function generatePanchangam(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
+        Accept: "application/x-ndjson",
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
@@ -86,7 +90,42 @@ export async function generatePanchangam(
   if (!response.ok) {
     throw new Error("Failed to generate panchangam data")
   }
+  if (!response.body) {
+    throw new Error("Failed to generate panchangam data: empty response")
+  }
 
-  const json = await response.json()
-  return panchangamGenerateResult.parseAsync(json)
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let result: z.infer<typeof panchangamGenerateResult> | undefined
+
+  const handleLine = (line: string) => {
+    if (!line.trim()) return
+    const parsed = panchangamGenerateLine.parse(JSON.parse(line))
+    if (parsed.type === "progress") {
+      onProgress?.(parsed)
+    } else if (parsed.type === "error") {
+      throw new PanchangamGenerationError(parsed.detail)
+    } else {
+      result = parsed
+    }
+  }
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split("\n")
+    buffer = lines.pop() ?? ""
+    for (const line of lines) {
+      handleLine(line)
+    }
+  }
+  buffer += decoder.decode()
+  handleLine(buffer)
+
+  if (!result) {
+    throw new Error("Panchangam generation stream ended without a result")
+  }
+  return result
 }

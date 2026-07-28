@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { EventFormDialog } from "../EventFormDialog"
+import { GenerateOccurrencesDialog } from "../GenerateOccurrencesDialog"
 import { buildSanthigiriEventColumns } from "../santhigiriEventColumns"
 import type { SanthigiriEvent } from "@/api/schemas/santhigiriEvent"
 import {
@@ -36,6 +37,7 @@ export default function SanthigiriEventsTab() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingEvent, setDeletingEvent] = useState<SanthigiriEvent | null>(null)
+  const [generatingEvent, setGeneratingEvent] = useState<SanthigiriEvent | null>(null)
 
   const editingEventDetail = useSanthigiriEventDetail(editingId)
   const createMutation = useCreateSanthigiriEvent()
@@ -46,6 +48,7 @@ export default function SanthigiriEventsTab() {
     isAdmin,
     onEdit: (event) => setEditingId(event.id),
     onDelete: (event) => setDeletingEvent(event),
+    onGenerateOccurrences: (event) => setGeneratingEvent(event),
   })
 
   return (
@@ -84,6 +87,13 @@ export default function SanthigiriEventsTab() {
         onSubmit={({ id, ...values }) =>
           updateMutation.mutateAsync({ eventId: id, values })
         }
+      />
+
+      <GenerateOccurrencesDialog
+        event={generatingEvent}
+        onOpenChange={(open) => {
+          if (!open) setGeneratingEvent(null)
+        }}
       />
 
       <AlertDialog

@@ -42,6 +42,7 @@ export const compactPanchangamData = z.object({
 export type CompactPanchangamData = z.infer<typeof compactPanchangamData>
 
 export const panchangamGenerateResult = z.object({
+  type: z.literal("complete"),
   start_date: z.iso.date(),
   end_date: z.iso.date(),
   count: z.number().int(),
@@ -49,3 +50,25 @@ export const panchangamGenerateResult = z.object({
 })
 
 export type PanchangamGenerateResult = z.infer<typeof panchangamGenerateResult>
+
+export const panchangamGenerateProgress = z.object({
+  type: z.literal("progress"),
+  completed: z.number().int(),
+  total: z.number().int(),
+  percent: z.number(),
+  current_date: z.iso.date(),
+  elapsed_seconds: z.number(),
+})
+
+export type PanchangamGenerateProgress = z.infer<typeof panchangamGenerateProgress>
+
+export const panchangamGenerateError = z.object({
+  type: z.literal("error"),
+  detail: z.string(),
+})
+
+export const panchangamGenerateLine = z.discriminatedUnion("type", [
+  panchangamGenerateProgress,
+  panchangamGenerateResult,
+  panchangamGenerateError,
+])

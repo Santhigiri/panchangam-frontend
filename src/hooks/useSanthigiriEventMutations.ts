@@ -3,9 +3,11 @@ import type { SanthigiriEventFormValues } from "@/api/schemas/santhigiriEvent"
 import {
   createSanthigiriEvent,
   deleteSanthigiriEvent,
+  generateSanthigiriEventOccurrences,
   updateSanthigiriEvent,
 } from "@/api/santhigiriEvents"
 import { getAccessToken } from "@/hooks/useAuth"
+import { queryClient } from "@/lib/query-client"
 
 function requireAccessToken() {
   const accessToken = getAccessToken()
@@ -39,6 +41,21 @@ export function useUpdateSanthigiriEvent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["santhigiri-events"] })
     },
+  })
+}
+
+export function useGenerateSanthigiriEventOccurrences() {
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      startYear,
+      endYear,
+    }: {
+      eventId: string
+      startYear: number
+      endYear: number
+    }) =>
+      generateSanthigiriEventOccurrences(eventId, startYear, endYear, requireAccessToken()),
   })
 }
 

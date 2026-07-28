@@ -1,11 +1,17 @@
 import { useState } from "react"
-import { endOfMonth, format, startOfMonth } from "date-fns"
+import { format, startOfMonth } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
 import { panchangamColumns } from "../columns"
+import type { DateRange } from "react-day-picker"
+import type { PanchangamGenerateProgress } from "@/api/schemas/compactPanchangamData"
 import { generatePanchangam } from "@/api/panchangamGeneration"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Calendar } from "@/components/ui/calendar"
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/ui/data-table"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -40,18 +46,23 @@ export default function PanchangamTab() {
     LOCATION
   )
 
+  const [progress, setProgress] = useState<PanchangamGenerateProgress | null>(null)
+  const [range, setRange] = useState<DateRange | undefined>(() => ({
+    from: startOfMonth(new Date()),
+    to: new Date(),
+  }))
+
   const generateMutation = useMutation({
     mutationFn: () => {
       const accessToken = getAccessToken()
       if (!accessToken) {
         throw new Error("You need to log in to do this")
       }
-      return generatePanchangam(
-        startOfMonth(activeMonth),
-        endOfMonth(activeMonth),
-        LOCATION,
-        accessToken
-      )
+      if (!range?.from || !range.to) {
+        throw new Error("Select a date range to generate.")
+      }
+      setProgress(null)
+      return generatePanchangam(range.from, range.to, LOCATION, accessToken, setProgress)
     },
   })
 
@@ -69,10 +80,80 @@ export default function PanchangamTab() {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Month</CardTitle>
+          <CardTitle>Generate</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="justify-start font-normal">
+                  <CalendarIcon />
+                  {range?.from
+                    ? range.to
+                      ? `${format(range.from, "d MMM yyyy")} – ${format(range.to, "d MMM yyyy")}`
+                      : format(range.from, "d MMM yyyy")
+                    : "Select date range"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="range"
+                  numberOfMonths={2}
+                  captionLayout="dropdown"
+                  selected={range}
+                  onSelect={setRange}
+                  startMonth={CALENDAR_START_DATE}
+                  endMonth={CALENDAR_END_DATE}
+                  disabled={{ before: CALENDAR_START_DATE, after: CALENDAR_END_DATE }}
+                />
+              </PopoverContent>
+            </Popover>
+            <Button
+              disabled={!isAdmin || generateMutation.isPending || !range?.from || !range.to}
+              onClick={() => generateMutation.mutate()}
+            >
+              {generateMutation.isPending ? "Generating..." : "Generate"}
+            </Button>
+            {!isAuthenticated && (
+              <span className="text-sm text-muted-foreground">
+                Log in as an admin to generate data.
+              </span>
+            )}
+            {isAuthenticated && !isAdmin && (
+              <span className="text-sm text-muted-foreground">
+                Only admins can generate data.
+              </span>
+            )}
+          </div>
+
+          {generateMutation.isPending && progress && (
+            <div className="flex flex-col gap-1">
+              <Progress value={progress.percent} />
+              <span className="text-sm text-muted-foreground">
+                {progress.completed}/{progress.total} days ({format(new Date(progress.current_date), "d MMM")})
+              </span>
+            </div>
+          )}
+          {generateMutation.isSuccess && (
+            <p className="text-sm text-foreground">
+              Generated {generateMutation.data.count} day(s) from{" "}
+              {generateMutation.data.start_date} to {generateMutation.data.end_date}.
+            </p>
+          )}
+          {generateMutation.isError && (
+            <p className="text-sm text-destructive">
+              {generateMutation.error instanceof Error
+                ? generateMutation.error.message
+                : "Failed to generate panchangam data."}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{format(activeMonth, "MMMM yyyy")}</CardTitle>
+          <CardAction className="flex items-center gap-2">
             <Select
               value={String(activeMonth.getMonth())}
               onValueChange={(value) =>
@@ -107,48 +188,7 @@ export default function PanchangamTab() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              disabled={!isAdmin || generateMutation.isPending}
-              onClick={() => generateMutation.mutate()}
-            >
-              {generateMutation.isPending
-                ? "Generating..."
-                : `Generate ${format(activeMonth, "MMMM yyyy")}`}
-            </Button>
-            {!isAuthenticated && (
-              <span className="text-sm text-muted-foreground">
-                Log in as an admin to generate data.
-              </span>
-            )}
-            {isAuthenticated && !isAdmin && (
-              <span className="text-sm text-muted-foreground">
-                Only admins can generate data.
-              </span>
-            )}
-          </div>
-
-          {generateMutation.isSuccess && (
-            <p className="text-sm text-foreground">
-              Generated {generateMutation.data.count} day(s) from{" "}
-              {generateMutation.data.start_date} to {generateMutation.data.end_date}.
-            </p>
-          )}
-          {generateMutation.isError && (
-            <p className="text-sm text-destructive">
-              {generateMutation.error instanceof Error
-                ? generateMutation.error.message
-                : "Failed to generate panchangam data."}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{format(activeMonth, "MMMM yyyy")}</CardTitle>
+          </CardAction>
         </CardHeader>
         <CardContent>
           {isLoading && (
