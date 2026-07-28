@@ -61,6 +61,7 @@ export default function DayDetailsPage() {
             >
               <Calendar
                 mode="single"
+                captionLayout="dropdown"
                 selected={activeDate}
                 defaultMonth={activeDate}
                 startMonth={CALENDAR_START_DATE}
