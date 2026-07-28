@@ -41,7 +41,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <div className="flex h-screen w-full bg-[#F5F5DC] overflow-hidden">
+      <div className="flex h-dvh w-full bg-[#F5F5DC] overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-2 pb-16 md:ml-16 md:pb-2">
           <Outlet /> {/* Child routes render here */}
