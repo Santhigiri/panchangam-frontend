@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getAccessToken, useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 import { usePanchangamMonth } from "@/hooks/usePanchangamMonth"
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants"
 
@@ -54,15 +54,11 @@ export default function PanchangamTab() {
 
   const generateMutation = useMutation({
     mutationFn: () => {
-      const accessToken = getAccessToken()
-      if (!accessToken) {
-        throw new Error("You need to log in to do this")
-      }
       if (!range?.from || !range.to) {
         throw new Error("Select a date range to generate.")
       }
       setProgress(null)
-      return generatePanchangam(range.from, range.to, LOCATION, accessToken, setProgress)
+      return generatePanchangam(range.from, range.to, LOCATION, setProgress)
     },
   })
 

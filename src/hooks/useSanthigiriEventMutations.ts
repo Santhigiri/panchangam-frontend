@@ -9,22 +9,12 @@ import {
   generateSanthigiriEventOccurrences,
   updateSanthigiriEvent,
 } from "@/api/santhigiriEvents"
-import { getAccessToken } from "@/hooks/useAuth"
-import { queryClient } from "@/lib/query-client"
-
-function requireAccessToken() {
-  const accessToken = getAccessToken()
-  if (!accessToken) {
-    throw new Error("You need to log in to do this")
-  }
-  return accessToken
-}
 
 export function useCreateSanthigiriEvent() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (values: SanthigiriEventFormValues) =>
-      createSanthigiriEvent(values, requireAccessToken()),
+      createSanthigiriEvent(values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["santhigiri-events"] })
     },
@@ -40,7 +30,7 @@ export function useUpdateSanthigiriEvent() {
     }: {
       eventId: string
       values: Omit<SanthigiriEventFormValues, "id">
-    }) => updateSanthigiriEvent(eventId, values, requireAccessToken()),
+    }) => updateSanthigiriEvent(eventId, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["santhigiri-events"] })
     },
@@ -64,7 +54,6 @@ export function useGenerateSanthigiriEventOccurrences(
         eventId,
         startYear,
         endYear,
-        requireAccessToken(),
         onProgress
       ),
   })
@@ -73,8 +62,7 @@ export function useGenerateSanthigiriEventOccurrences(
 export function useDeleteSanthigiriEvent() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (eventId: string) =>
-      deleteSanthigiriEvent(eventId, requireAccessToken()),
+    mutationFn: (eventId: string) => deleteSanthigiriEvent(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["santhigiri-events"] })
     },
