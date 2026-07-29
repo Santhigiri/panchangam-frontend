@@ -54,6 +54,7 @@ const config = defineConfig({
       },
       includeAssets: [
         "favicon.ico",
+        "apple-touch-icon.png",
       ],
 
       manifest: {
@@ -62,20 +63,39 @@ const config = defineConfig({
         description: "Malayalam Panchangam Calendar",
         display: "standalone",
 
-        theme_color: "transparent",      // not reliably supported
-        background_color: "#00000000",   // transparent RGBA hex
+        // Night-sky indigo — drives the splash screen and the Android task
+        // switcher / address-bar tint.
+        theme_color: "#0B1026",
+        background_color: "#0B1026",
+        // `any` and `maskable` are split into separate assets: a single PNG
+        // can't be optimal for both. The maskable icons fill the whole
+        // adaptive-icon shape edge-to-edge with the night-sky background (no
+        // white plate on Android); the `any` icons keep a transparent moon for
+        // browsers/desktops that render non-maskable icons.
         icons: [
           {
-            src: "manifest-icon-192.maskable-preview.png",
+            src: "pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "any"
           },
           {
-            src: "manifest-icon-512.maskable.png",
+            src: "pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "any"
+          },
+          {
+            src: "maskable-icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable"
+          },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
           }
         ]
       }
