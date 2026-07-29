@@ -66,7 +66,6 @@ export async function generatePanchangam(
   startDate: Date,
   endDate: Date,
   location: string,
-  accessToken: string,
   onProgress?: (progress: PanchangamGenerateProgress) => void
 ) {
   const response = await fetch(
@@ -76,8 +75,8 @@ export async function generatePanchangam(
       headers: {
         "Content-Type": "application/json",
         Accept: "application/x-ndjson",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({
         start_date: dateKey(startDate),
         end_date: dateKey(endDate),

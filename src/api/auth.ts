@@ -1,4 +1,4 @@
-import { tokenResponse } from "./schemas/auth"
+import { loginResponse } from "./schemas/auth"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -17,6 +17,8 @@ export async function login(username: string, password: string) {
       Accept: "application/json",
     },
     body: new URLSearchParams({ username, password }),
+    // Needed so the browser stores the HTTP-only auth cookies the server sets.
+    credentials: "include",
   })
 
   if (response.status === 401) {
@@ -28,5 +30,13 @@ export async function login(username: string, password: string) {
   }
 
   const json = await response.json()
-  return tokenResponse.parseAsync(json)
+  return loginResponse.parseAsync(json)
+}
+
+export async function logout() {
+  // Clears the HTTP-only auth cookies server-side.
+  await fetch(`${APP_BASE_URL}/api/v1/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  })
 }

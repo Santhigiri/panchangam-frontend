@@ -1,10 +1,11 @@
 import { toast } from "sonner"
 import { createContext, useContext, useState } from "react"
 import type { ReactNode } from "react"
-import { login as loginRequest } from "@/api/auth"
+import { login as loginRequest, logout as logoutRequest } from "@/api/auth"
 
-const ACCESS_TOKEN_KEY = "panchangam.access_token"
-const REFRESH_TOKEN_KEY = "panchangam.refresh_token"
+// The access & refresh tokens live in HTTP-only cookies that JavaScript cannot
+// read. We keep only the non-sensitive username/role in localStorage so the UI
+// can show who is logged in across reloads; the cookies are the real credential.
 const USERNAME_KEY = "panchangam.username"
 const ROLE_KEY = "panchangam.role"
 
@@ -13,20 +14,10 @@ type AuthContextValue = {
   role: string | null
   isAuthenticated: boolean
   login: (username: string, password: string) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
-
-function decodeRole(accessToken: string): string | null {
-  try {
-    const payload = accessToken.split(".")[1]
-    const claims = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")))
-    return typeof claims.role === "string" ? claims.role : null
-  } catch {
-    return null
-  }
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(() =>
@@ -37,29 +28,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   async function login(loginUsername: string, password: string) {
-    const tokens = await loginRequest(loginUsername, password)
-    const loginRole = decodeRole(tokens.access_token)
-    localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access_token)
-    localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token)
-    localStorage.setItem(USERNAME_KEY, loginUsername)
-    if (loginRole) {
-      localStorage.setItem(ROLE_KEY, loginRole)
-    } else {
-      localStorage.removeItem(ROLE_KEY)
-    }
-    setUsername(loginUsername)
-    setRole(loginRole)
-    toast.success(`Logged in as ${loginUsername}`)
+    const user = await loginRequest(loginUsername, password)
+    localStorage.setItem(USERNAME_KEY, user.username)
+    localStorage.setItem(ROLE_KEY, user.role)
+    setUsername(user.username)
+    setRole(user.role)
+    toast.success(`Logged in as ${user.username}`)
   }
 
-  function logout() {
-    localStorage.removeItem(ACCESS_TOKEN_KEY)
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-    localStorage.removeItem(USERNAME_KEY)
-    localStorage.removeItem(ROLE_KEY)
-    setUsername(null)
-    setRole(null)
-    toast.success("Logged out")
+  async function logout() {
+    try {
+      await logoutRequest()
+    } finally {
+      localStorage.removeItem(USERNAME_KEY)
+      localStorage.removeItem(ROLE_KEY)
+      setUsername(null)
+      setRole(null)
+      toast.success("Logged out")
+    }
   }
 
   return (
@@ -77,8 +63,4 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider")
   }
   return context
-}
-
-export function getAccessToken() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
 }
