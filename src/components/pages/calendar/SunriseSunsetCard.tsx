@@ -17,22 +17,28 @@ type SunriseSunsetProps = {
   sunset: ISODatetime
 }
 
+// An elliptical dome, not a true semicircle: a semicircle this wide would
+// peak well above the viewBox (center_y - radius < 0) and get clipped by
+// the SVG's own bounds right around solar noon, when the progress dot is
+// near the top. Flattening the vertical radius keeps the whole arc, and
+// the dot at any time of day, inside the visible box.
 const ARC_CENTER_X = 150
 const ARC_CENTER_Y = 90
-const ARC_RADIUS = 130
+const ARC_RADIUS_X = 130
+const ARC_RADIUS_Y = 64
 const ARC_START = { x: 20, y: 90 }
 
 function pointOnArc(fraction: number): { x: number, y: number } {
   const angle = Math.PI * (1 - fraction)
   return {
-    x: ARC_CENTER_X + ARC_RADIUS * Math.cos(angle),
-    y: ARC_CENTER_Y - ARC_RADIUS * Math.sin(angle),
+    x: ARC_CENTER_X + ARC_RADIUS_X * Math.cos(angle),
+    y: ARC_CENTER_Y - ARC_RADIUS_Y * Math.sin(angle),
   }
 }
 
 function arcPath(fraction: number): string {
   const { x, y } = pointOnArc(fraction)
-  return `M${ARC_START.x},${ARC_START.y} A${ARC_RADIUS},${ARC_RADIUS} 0 0 1 ${x},${y}`
+  return `M${ARC_START.x},${ARC_START.y} A${ARC_RADIUS_X},${ARC_RADIUS_Y} 0 0 1 ${x},${y}`
 }
 
 export default function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProps): ReactNode {
