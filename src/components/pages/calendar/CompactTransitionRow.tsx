@@ -20,11 +20,13 @@ export function CompactTransitionRow({
   isCurrent,
 }: CompactTransitionRowProps) {
   return (
-    <Card className={cn("rounded-md py-2", isCurrent && "bg-primary/10 border-primary/30")}>
-      <CardContent className="flex flex-row items-center gap-3 px-3">
-        <Icon className="h-5 w-5 text-primary shrink-0" />
+    <Card className={cn("rounded-md py-3", isCurrent && "bg-primary/10 border-primary/30")}>
+      <CardContent className="flex flex-row items-center gap-3 px-4">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+          <Icon className="h-5 w-5 text-primary" />
+        </div>
         <div className="flex flex-col min-w-0">
-          <p className="text-sm font-medium font-playfair-display truncate">
+          <p className="text-[15px] font-medium font-playfair-display truncate">
             {value}
             {subLabel && <span className="text-xs text-muted-foreground"> ({subLabel})</span>}
           </p>
