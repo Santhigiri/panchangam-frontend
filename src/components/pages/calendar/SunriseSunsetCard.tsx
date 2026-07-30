@@ -17,30 +17,6 @@ type SunriseSunsetProps = {
   sunset: ISODatetime
 }
 
-// An elliptical dome, not a true semicircle: a semicircle this wide would
-// peak well above the viewBox (center_y - radius < 0) and get clipped by
-// the SVG's own bounds right around solar noon, when the progress dot is
-// near the top. Flattening the vertical radius keeps the whole arc, and
-// the dot at any time of day, inside the visible box.
-const ARC_CENTER_X = 150
-const ARC_CENTER_Y = 90
-const ARC_RADIUS_X = 130
-const ARC_RADIUS_Y = 64
-const ARC_START = { x: 20, y: 90 }
-
-function pointOnArc(fraction: number): { x: number, y: number } {
-  const angle = Math.PI * (1 - fraction)
-  return {
-    x: ARC_CENTER_X + ARC_RADIUS_X * Math.cos(angle),
-    y: ARC_CENTER_Y - ARC_RADIUS_Y * Math.sin(angle),
-  }
-}
-
-function arcPath(fraction: number): string {
-  const { x, y } = pointOnArc(fraction)
-  return `M${ARC_START.x},${ARC_START.y} A${ARC_RADIUS_X},${ARC_RADIUS_Y} 0 0 1 ${x},${y}`
-}
-
 export default function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProps): ReactNode {
   const sunriseDate = parseISO(sunrise)
   const sunsetDate = parseISO(sunset)
@@ -57,50 +33,40 @@ export default function SunriseSunsetCard({ sunrise, sunset }: SunriseSunsetProp
     ? Math.min(1, Math.max(0, elapsedMinutes / totalMinutes))
     : 0
 
-  const progressDot = pointOnArc(progress)
+  // Future days: bar not yet started. Past days: bar fully complete.
+  // Today: reflects live elapsed/total-daylight-minutes progress.
+  const fillPercent = today ? progress * 100 : past ? 100 : 0
 
   return (
     <Card className="rounded-md py-4">
-      <CardContent className="flex flex-col items-center gap-2 px-4">
-        <div className="relative w-full max-w-[280px] h-[110px]">
-          <svg viewBox="0 0 300 100" className="absolute inset-0 h-full w-full" aria-hidden="true">
-            <path
-              d={arcPath(1)}
-              fill="none"
-              className="stroke-border"
-              strokeWidth={6}
-              strokeLinecap="round"
-            />
-            {(today || past) && (
-              <path
-                d={arcPath(today ? progress : 1)}
-                fill="none"
-                className="stroke-primary"
-                strokeWidth={6}
-                strokeLinecap="round"
-              />
-            )}
-            {today && (
-              <circle
-                cx={progressDot.x}
-                cy={progressDot.y}
-                r={6}
-                className="fill-primary stroke-background"
-                strokeWidth={2}
-              />
-            )}
-          </svg>
-          <div className="absolute bottom-0 left-0 flex flex-col items-start gap-0.5">
+      <CardContent className="flex flex-col items-center gap-3 px-4">
+        <div className="flex w-full items-end justify-between gap-2">
+          <div className="flex flex-col items-start gap-0.5">
             <SunriseIcon className="h-5 w-5 text-primary" />
             <p className="font-inter text-muted-foreground text-[12px] font-semibold">SUNRISE</p>
             <p className="font-inter text-sm font-medium">{getFormattedTime(sunrise)}</p>
           </div>
-          <div className="absolute bottom-0 right-0 flex flex-col items-end gap-0.5">
+          <div className="flex flex-col items-end gap-0.5">
             <SunsetIcon className="h-5 w-5 text-primary" />
             <p className="font-inter text-muted-foreground text-[12px] font-semibold">SUNSET</p>
             <p className="font-inter text-sm font-medium">{getFormattedTime(sunset)}</p>
           </div>
         </div>
+
+        <div className="relative h-2 w-full" aria-hidden="true">
+          <div className="absolute inset-0 rounded-full bg-border" />
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+            style={{ width: `${fillPercent}%` }}
+          />
+          {today && (
+            <div
+              className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-primary shadow-sm"
+              style={{ left: `${fillPercent}%` }}
+            />
+          )}
+        </div>
+
         <p className="font-inter text-xs text-muted-foreground">
           daylight · {duration.hours ?? 0}h {duration.minutes ?? 0}m
         </p>
