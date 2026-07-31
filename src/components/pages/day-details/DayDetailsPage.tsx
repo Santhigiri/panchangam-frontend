@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useHomePanchangam } from "@/hooks/homepage/useHomePanchangam";
+import { useLocalSunriseSunset } from "@/hooks/homepage/useLocalSunriseSunset";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<
 
 export default function DayDetailsPage() {
   const { activeDate, setActiveDate, activeDateData, upcomingEvents } = useHomePanchangam();
+  const { sunrise, sunset, timeZone } = useLocalSunriseSunset(activeDate);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   return (
@@ -115,8 +117,9 @@ export default function DayDetailsPage() {
 
             <div className="col-span-2">
               <SunriseSunsetCard
-                sunrise={activeDateData.sunrise}
-                sunset={activeDateData.sunset}
+                sunrise={sunrise ?? activeDateData.sunrise}
+                sunset={sunset ?? activeDateData.sunset}
+                timeZone={timeZone}
               />
             </div>
 
