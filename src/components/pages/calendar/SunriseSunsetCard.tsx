@@ -35,8 +35,8 @@ export default function SunriseSunsetCard({ sunrise, sunset, timeZone }: Sunrise
   const daylightRemainderMinutes = daylightMinutes % 60
 
   const elapsedMinutes = differenceInMinutes(now, sunriseDate)
-  const progress = totalMinutes > 0
-    ? Math.min(1, Math.max(0, elapsedMinutes / totalMinutes))
+  const progress = daylightMinutes > 0
+    ? Math.min(1, Math.max(0, elapsedMinutes / daylightMinutes))
     : 0
 
   // Future days: bar not yet started. Past days: bar fully complete.
