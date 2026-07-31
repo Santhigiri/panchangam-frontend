@@ -50,10 +50,10 @@ export const RefreshPrompt = () => {
   if (!needRefresh) return null;
 
   return (
-    <Card className="fixed bottom-10 right-4 shadow-lg w-48">
-      <CardContent className="pt-4 flex flex-col gap-2">
-        <p className="text-sm">New update available!</p>
-        <Button size="sm" onClick={reloadPage}>
+    <Card className="fixed top-16 right-4 md:top-auto md:bottom-10 shadow-lg z-40">
+      <CardContent className="p-3 flex items-center gap-3">
+        <p className="text-sm whitespace-nowrap">Update available</p>
+        <Button size="xs" onClick={reloadPage}>
           Refresh
         </Button>
       </CardContent>
