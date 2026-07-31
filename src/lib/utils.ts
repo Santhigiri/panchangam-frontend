@@ -16,10 +16,11 @@ export function getFormattedDate(datetime: string): string {
   return new Date(datetime).toLocaleString(locale, options)
 }
 
-export function getFormattedTime(datetime: string): string {
+export function getFormattedTime(datetime: string, timeZone?: string): string {
   const options: Intl.DateTimeFormatOptions = {
     hour: 'numeric', minute: 'numeric',
-    hour12: false
+    hour12: false,
+    ...(timeZone ? { timeZone } : {}),
   };
 
   const locale = 'en-IN'
@@ -28,14 +29,15 @@ export function getFormattedTime(datetime: string): string {
 
 }
 
-export function getFormattedDateTime(datetime: string | null): string {
+export function getFormattedDateTime(datetime: string | null, timeZone?: string): string {
 
   if (datetime === null) return ""
 
   const options: Intl.DateTimeFormatOptions = {
     month: 'short', day: 'numeric',
     hour: 'numeric', minute: 'numeric',
-    hour12: true
+    hour12: true,
+    ...(timeZone ? { timeZone } : {}),
   };
 
   const locale = 'en-IN'
