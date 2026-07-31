@@ -1,6 +1,5 @@
 import {
   differenceInMinutes,
-  intervalToDuration,
   isBefore,
   isToday,
   parseISO,
@@ -26,9 +25,15 @@ export default function SunriseSunsetCard({ sunrise, sunset, timeZone }: Sunrise
   const today = isToday(sunriseDate)
   const past = !today && isBefore(startOfDay(sunriseDate), startOfDay(now))
 
-  const duration = intervalToDuration({ start: sunriseDate, end: sunsetDate })
-
   const totalMinutes = differenceInMinutes(sunsetDate, sunriseDate)
+  // Normalize to a same-day span: sunrise/sunset instants can come back
+  // ordered such that the raw difference is negative (e.g. a day-boundary
+  // edge case in the source data), which should read as "wrapped past
+  // midnight" rather than a negative daylight duration.
+  const daylightMinutes = ((totalMinutes % 1440) + 1440) % 1440
+  const daylightHours = Math.floor(daylightMinutes / 60)
+  const daylightRemainderMinutes = daylightMinutes % 60
+
   const elapsedMinutes = differenceInMinutes(now, sunriseDate)
   const progress = totalMinutes > 0
     ? Math.min(1, Math.max(0, elapsedMinutes / totalMinutes))
@@ -69,7 +74,7 @@ export default function SunriseSunsetCard({ sunrise, sunset, timeZone }: Sunrise
         </div>
 
         <p className="font-inter text-xs text-muted-foreground">
-          daylight · {duration.hours ?? 0}h {duration.minutes ?? 0}m
+          daylight · {daylightHours}h {daylightRemainderMinutes}m
         </p>
       </CardContent>
     </Card>
