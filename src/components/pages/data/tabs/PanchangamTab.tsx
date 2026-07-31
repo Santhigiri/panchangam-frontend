@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { format, startOfMonth } from "date-fns"
+import { format, parseISO, startOfMonth } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
 import { panchangamColumns } from "../columns"
@@ -126,7 +126,7 @@ export default function PanchangamTab() {
             <div className="flex flex-col gap-1">
               <Progress value={progress.percent} />
               <span className="text-sm text-muted-foreground">
-                {progress.completed}/{progress.total} days ({format(new Date(progress.current_date), "d MMM")})
+                {progress.completed}/{progress.total} days ({format(parseISO(progress.current_date), "d MMM")})
               </span>
             </div>
           )}
