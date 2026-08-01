@@ -1,0 +1,63 @@
+import { ForbiddenError, UnauthorizedError } from "./panchangamGeneration"
+import { appSetting, appSettingList } from "./schemas/appSettings"
+import type { AppSetting } from "./schemas/appSettings"
+
+const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "NotFoundError"
+  }
+}
+
+async function parseErrorDetail(response: Response, fallback: string) {
+  try {
+    const body = await response.json()
+    return typeof body.detail === "string" ? body.detail : fallback
+  } catch {
+    return fallback
+  }
+}
+
+async function handleErrors(response: Response) {
+  if (response.status === 401) throw new UnauthorizedError()
+  if (response.status === 403) throw new ForbiddenError()
+  if (response.status === 404) {
+    throw new NotFoundError(await parseErrorDetail(response, "Setting not found"))
+  }
+  if (!response.ok) {
+    throw new Error(await parseErrorDetail(response, "Request failed"))
+  }
+}
+
+// Every /api/v1/settings endpoint requires the admin role, including reads
+// (see panchangam-api's api/routes/v1/settings.py), so both of these send
+// credentials.
+export async function getAppSettings(): Promise<Array<AppSetting>> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/settings`, {
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return appSettingList.parseAsync(json)
+}
+
+export async function updateAppSetting(
+  key: string,
+  value: Record<string, unknown>
+): Promise<AppSetting> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/settings/${encodeURIComponent(key)}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ value }),
+  })
+  await handleErrors(response)
+  const json = await response.json()
+  return appSetting.parseAsync(json)
+}
