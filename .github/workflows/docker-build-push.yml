@@ -1,0 +1,112 @@
+name: Build, Push, and Deploy
+on:
+  push:
+    branches:
+      - develop
+      - release
+      - main
+  workflow_dispatch:
+env:
+  IMAGE_NAME: kallar
+  GCP_PROJECT: santhigiri-496211
+  GCP_REGION: asia-south1
+  AR_REPO: santhigiri
+jobs:
+  build-push-deploy:
+    runs-on: [self-hosted, proxmox]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- Tag generation ---
+      - name: Generate version tag
+        id: version
+        run: |
+          DATE=$(date -u +%Y.%m.%d)
+          PUSH_NUM=$(git log --oneline \
+            --since="${DATE} 00:00:00" --until="${DATE} 23:59:59" \
+            "${{ github.sha }}" | wc -l | tr -d ' ')
+
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            TAG="dev-${DATE}.${PUSH_NUM}"
+            SERVICE="kallar-dev"
+          elif [ "${{ github.ref }}" = "refs/heads/release" ]; then
+            TAG="staging-${DATE}.${PUSH_NUM}"
+            SERVICE="kallar-staging"
+          else
+            TAG="${DATE}.${PUSH_NUM}"
+            SERVICE="kallar-prod"
+          fi
+
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "SERVICE=${SERVICE}" >> $GITHUB_OUTPUT
+          echo "Generated tag: ${TAG}, service: ${SERVICE}"
+
+      # --- Select API base URL for this environment ---
+      - name: Select API base URL
+        id: apiurl
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL_DEV }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/release" ]; then
+            echo "VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL_STAGING }}" >> $GITHUB_OUTPUT
+          else
+            echo "VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL_PROD }}" >> $GITHUB_OUTPUT
+          fi
+
+      # --- GCP auth ---
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      # --- Build ---
+      - name: Build Docker image
+        run: |
+          AR_IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.AR_REPO }}/${{ env.IMAGE_NAME }}"
+          docker build \
+            --build-arg VITE_APP_BASE_URL="${{ steps.apiurl.outputs.VITE_APP_BASE_URL }}" \
+            -t "${AR_IMAGE}:${{ steps.version.outputs.TAG }}" -f Dockerfile .
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            docker tag "${AR_IMAGE}:${{ steps.version.outputs.TAG }}" "${AR_IMAGE}:latest"
+          fi
+
+      # --- Push to Artifact Registry ---
+      - name: Push image to Artifact Registry
+        run: |
+          AR_IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.AR_REPO }}/${{ env.IMAGE_NAME }}"
+          docker push "${AR_IMAGE}:${{ steps.version.outputs.TAG }}"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            docker push "${AR_IMAGE}:latest"
+          fi
+
+      # --- (Optional) Also push to Docker Hub ---
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Push images to Docker Hub
+        run: |
+          AR_IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.AR_REPO }}/${{ env.IMAGE_NAME }}"
+          docker tag "${AR_IMAGE}:${{ steps.version.outputs.TAG }}" "${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.TAG }}"
+          docker push "${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.TAG }}"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            docker tag "${AR_IMAGE}:latest" "${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
+            docker push "${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
+          fi
+      - name: Logout from Docker Hub
+        if: always()
+        run: docker logout
+
+      # --- Deploy to Cloud Run ---
+      - name: Deploy to Cloud Run
+        run: |
+          AR_IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.AR_REPO }}/${{ env.IMAGE_NAME }}"
+          gcloud run deploy ${{ steps.version.outputs.SERVICE }} \
+            --image="${AR_IMAGE}:${{ steps.version.outputs.TAG }}" \
+            --region=${{ env.GCP_REGION }} \
+            --project=${{ env.GCP_PROJECT }}
