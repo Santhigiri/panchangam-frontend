@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Calendar, Database, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
+import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "@/components/shared/LoginDialog";
 import ThemeToggle from "@/components/shared/ThemeToggle";
@@ -19,6 +19,7 @@ const baseNavItems: Array<NavItemProps> = [
 
 const adminNavItems: Array<NavItemProps> = [
   { to: "/data", icon: Database, label: "Data" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export default function Sidebar() {

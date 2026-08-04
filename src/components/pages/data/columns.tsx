@@ -1,7 +1,8 @@
-import { format } from "date-fns"
 import { SortableHeader } from "./SortableHeader"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { CompactPanchangamData } from "@/api/schemas/compactPanchangamData"
+import { APP_TIMEZONE } from "@/lib/constants"
+import { getFormattedTime } from "@/lib/utils"
 
 export const panchangamColumns: Array<ColumnDef<CompactPanchangamData>> = [
   {
@@ -24,11 +25,11 @@ export const panchangamColumns: Array<ColumnDef<CompactPanchangamData>> = [
   {
     accessorKey: "sunrise",
     header: "Sunrise",
-    cell: ({ row }) => format(new Date(row.original.sunrise), "HH:mm"),
+    cell: ({ row }) => getFormattedTime(row.original.sunrise, APP_TIMEZONE),
   },
   {
     accessorKey: "sunset",
     header: "Sunset",
-    cell: ({ row }) => format(new Date(row.original.sunset), "HH:mm"),
+    cell: ({ row }) => getFormattedTime(row.original.sunset, APP_TIMEZONE),
   },
 ]

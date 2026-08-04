@@ -3,6 +3,7 @@ import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import DateHeader from "../calendar/DateHeader";
 import SunriseSunsetCard from "../calendar/SunriseSunsetCard";
+import SunriseSunsetCardSkeleton from "../calendar/SunriseSunsetCardSkeleton";
 import ThithiTransitionCard from "../calendar/ThithiTransitionCard";
 import { NakshatraTransitionCard } from "../calendar/NakshatraTransitionCard";
 import UpcomingEventsCard from "../calendar/UpcomingEventsCard";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useHomePanchangam } from "@/hooks/homepage/useHomePanchangam";
+import { useLocalSunriseSunset } from "@/hooks/homepage/useLocalSunriseSunset";
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,7 @@ function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<
 
 export default function DayDetailsPage() {
   const { activeDate, setActiveDate, activeDateData, upcomingEvents } = useHomePanchangam();
+  const { sunrise, sunset, timeZone } = useLocalSunriseSunset(activeDate);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   return (
@@ -90,36 +93,44 @@ export default function DayDetailsPage() {
       <div className="grid grid-cols-2 justify-items-stretch gap-2">
 
         {activeDateData && (
-          <>
-            <div className="col-span-2">
-              <div className="flex flex-row justify-center items-center">
-                <ChevronLeft
-                  className="w-8 h-8 cursor-pointer"
-                  onClick={() => setActiveDate(addDays(activeDate, -1))}
-                />
-                <div className="flex-1">
-                  <DateHeader
-                    date={activeDate}
-                    kv_date={activeDateData.kv}
-                  />
-                </div>
-                <ChevronRight
-                  className="w-8 h-8 cursor-pointer"
-                  onClick={() => setActiveDate(addDays(activeDate, 1))}
+          <div className="col-span-2">
+            <div className="flex flex-row justify-center items-center">
+              <ChevronLeft
+                className="w-8 h-8 cursor-pointer"
+                onClick={() => setActiveDate(addDays(activeDate, -1))}
+              />
+              <div className="flex-1">
+                <DateHeader
+                  date={activeDate}
+                  kv_date={activeDateData.kv}
                 />
               </div>
-            </div>
-            <div className="col-span-2">
-              <GuruvaniCard />
-            </div>
-
-            <div className="col-span-2">
-              <SunriseSunsetCard
-                sunrise={activeDateData.sunrise}
-                sunset={activeDateData.sunset}
+              <ChevronRight
+                className="w-8 h-8 cursor-pointer"
+                onClick={() => setActiveDate(addDays(activeDate, 1))}
               />
             </div>
+          </div>
+        )}
 
+        <div className="col-span-2">
+          <GuruvaniCard />
+        </div>
+
+        <div className="col-span-2">
+          {activeDateData ? (
+            <SunriseSunsetCard
+              sunrise={sunrise ?? activeDateData.sunrise}
+              sunset={sunset ?? activeDateData.sunset}
+              timeZone={timeZone}
+            />
+          ) : (
+            <SunriseSunsetCardSkeleton />
+          )}
+        </div>
+
+        {activeDateData && (
+          <>
             <div className="col-span-2">
               <ThithiTransitionCard
                 transitions={activeDateData.thithi_transitions}

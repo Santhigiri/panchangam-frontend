@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { format, startOfMonth } from "date-fns"
+import { format, parseISO, startOfMonth } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
 import { panchangamColumns } from "../columns"
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getAccessToken, useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 import { usePanchangamMonth } from "@/hooks/usePanchangamMonth"
 import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants"
 
@@ -54,15 +54,11 @@ export default function PanchangamTab() {
 
   const generateMutation = useMutation({
     mutationFn: () => {
-      const accessToken = getAccessToken()
-      if (!accessToken) {
-        throw new Error("You need to log in to do this")
-      }
       if (!range?.from || !range.to) {
         throw new Error("Select a date range to generate.")
       }
       setProgress(null)
-      return generatePanchangam(range.from, range.to, LOCATION, accessToken, setProgress)
+      return generatePanchangam(range.from, range.to, LOCATION, setProgress)
     },
   })
 
@@ -130,7 +126,7 @@ export default function PanchangamTab() {
             <div className="flex flex-col gap-1">
               <Progress value={progress.percent} />
               <span className="text-sm text-muted-foreground">
-                {progress.completed}/{progress.total} days ({format(new Date(progress.current_date), "d MMM")})
+                {progress.completed}/{progress.total} days ({format(parseISO(progress.current_date), "d MMM")})
               </span>
             </div>
           )}

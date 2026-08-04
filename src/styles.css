@@ -57,34 +57,34 @@
 
 :root {
     /* Sacred Serenity Palette mapped to Variables */
-    --background: #fbfbe2; /* Parchment */
+    --background: #f2ecc9; /* Parchment */
     --foreground: #1c1c17;
-    --card: #f5f5dc;
+    --card: #ece5c4;
     --card-foreground: #1c1c17;
-    --popover: #fbfbe2;
+    --popover: #f2ecc9;
     --popover-foreground: #1c1c17;
     --primary: #ff9933; /* Saffron */
     --primary-foreground: #ffffff;
     --secondary: #800000; /* Sattvic Red */
     --secondary-foreground: #ffffff;
-    --muted: #f0f0d8;
+    --muted: #e6e0bd;
     --muted-foreground: #49483e;
     --accent: #ff9933;
     --accent-foreground: #ffffff;
     --destructive: #800000;
-    --border: #cbc7b5;
-    --input: #cbc7b5;
+    --border: #b5ab8f;
+    --input: #b5ab8f;
     --ring: #ff9933;
-    
+
     --radius: 0.5rem; /* 8px */
-    
-    --sidebar: #f5f5dc;
+
+    --sidebar: #ece5c4;
     --sidebar-foreground: #1c1c17;
     --sidebar-primary: #ff9933;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #ebebd0;
+    --sidebar-accent: #e0dab8;
     --sidebar-accent-foreground: #ff9933;
-    --sidebar-border: #cbc7b5;
+    --sidebar-border: #b5ab8f;
     --sidebar-ring: #ff9933;
 
     --chart-1: #ff9933;

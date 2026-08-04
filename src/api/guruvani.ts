@@ -50,17 +50,14 @@ export async function getRandomGuruvani(): Promise<Guruvani> {
   return guruvani.parseAsync(json)
 }
 
-export async function createGuruvani(
-  values: GuruvaniFormValues,
-  accessToken: string
-): Promise<Guruvani> {
+export async function createGuruvani(values: GuruvaniFormValues): Promise<Guruvani> {
   const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
     },
+    credentials: "include",
     body: JSON.stringify(values),
   })
   await handleErrors(response)
@@ -70,16 +67,15 @@ export async function createGuruvani(
 
 export async function updateGuruvani(
   id: number,
-  values: GuruvaniFormValues,
-  accessToken: string
+  values: GuruvaniFormValues
 ): Promise<Guruvani> {
   const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
     },
+    credentials: "include",
     body: JSON.stringify(values),
   })
   await handleErrors(response)
@@ -87,10 +83,10 @@ export async function updateGuruvani(
   return guruvani.parseAsync(json)
 }
 
-export async function deleteGuruvani(id: number, accessToken: string): Promise<void> {
+export async function deleteGuruvani(id: number): Promise<void> {
   const response = await fetch(`${APP_BASE_URL}/api/v1/guruvani/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    credentials: "include",
   })
   await handleErrors(response)
 }

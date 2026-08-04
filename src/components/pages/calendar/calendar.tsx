@@ -52,11 +52,11 @@ function DayDetailsHoverContent({ date, data }: { date: Date; data: PanchangamDa
       <div className="flex flex-row justify-between text-xs font-inter text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <SunriseIcon className="h-3.5 w-3.5" />
-          {getFormattedTime(data.sunrise)}
+          {getFormattedTime(data.sunrise, 'Asia/Kolkata')}
         </div>
         <div className="flex items-center gap-1.5">
           <SunsetIcon className="h-3.5 w-3.5" />
-          {getFormattedTime(data.sunset)}
+          {getFormattedTime(data.sunset, 'Asia/Kolkata')}
         </div>
       </div>
       <div className="flex flex-col gap-0.5 text-xs">

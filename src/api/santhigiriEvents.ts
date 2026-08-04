@@ -48,17 +48,14 @@ async function handleErrors(response: Response) {
   }
 }
 
-export async function createSanthigiriEvent(
-  values: SanthigiriEventFormValues,
-  accessToken: string
-) {
+export async function createSanthigiriEvent(values: SanthigiriEventFormValues) {
   const response = await fetch(`${APP_BASE_URL}/api/v1/panchangam/events`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
     },
+    credentials: "include",
     body: JSON.stringify(values),
   })
 
@@ -69,8 +66,7 @@ export async function createSanthigiriEvent(
 
 export async function updateSanthigiriEvent(
   eventId: string,
-  values: Omit<SanthigiriEventFormValues, "id">,
-  accessToken: string
+  values: Omit<SanthigiriEventFormValues, "id">
 ) {
   const response = await fetch(
     `${APP_BASE_URL}/api/v1/panchangam/events/${encodeURIComponent(eventId)}`,
@@ -79,8 +75,8 @@ export async function updateSanthigiriEvent(
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify(values),
     }
   )
@@ -90,12 +86,12 @@ export async function updateSanthigiriEvent(
   return santhigiriEventDetail.parseAsync(json)
 }
 
-export async function deleteSanthigiriEvent(eventId: string, accessToken: string) {
+export async function deleteSanthigiriEvent(eventId: string) {
   const response = await fetch(
     `${APP_BASE_URL}/api/v1/panchangam/events/${encodeURIComponent(eventId)}`,
     {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: "include",
     }
   )
 
@@ -108,7 +104,6 @@ export async function generateSanthigiriEventOccurrences(
   eventId: string,
   startYear: number,
   endYear: number,
-  accessToken: string,
   onProgress?: (progress: SanthigiriEventGenerateProgress) => void
 ): Promise<SanthigiriEventGenerateResult> {
   const response = await fetch(
@@ -118,8 +113,8 @@ export async function generateSanthigiriEventOccurrences(
       headers: {
         "Content-Type": "application/json",
         Accept: "application/x-ndjson",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({ start_year: startYear, end_year: endYear }),
     }
   )
