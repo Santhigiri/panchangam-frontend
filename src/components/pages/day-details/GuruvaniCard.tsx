@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useRandomGuruvani } from "@/hooks/useGuruvani"
 import { cn } from "@/lib/utils"
 
@@ -15,7 +16,10 @@ export default function GuruvaniCard() {
       <CardContent className="flex flex-col gap-1 px-4">
         <p className="font-semibold text-xs text-muted-foreground">GURUVANI</p>
         {isLoading && (
-          <p className="font-inter text-xs text-muted-foreground">Loading...</p>
+          <div className="flex flex-col gap-2 pt-1">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-2/3" />
+          </div>
         )}
         {isError && (
           <p className="font-inter text-xs text-muted-foreground">
