@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StarfinderIndexRouteImport } from './routes/starfinder/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as DataIndexRouteImport } from './routes/data/index'
 import { Route as CalendarIndexRouteImport } from './routes/calendar/index'
@@ -17,6 +18,11 @@ import { Route as CalendarIndexRouteImport } from './routes/calendar/index'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StarfinderIndexRoute = StarfinderIndexRouteImport.update({
+  id: '/starfinder/',
+  path: '/starfinder/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/calendar/': typeof CalendarIndexRoute
   '/data/': typeof DataIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/starfinder/': typeof StarfinderIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarIndexRoute
   '/data': typeof DataIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/starfinder': typeof StarfinderIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/calendar/': typeof CalendarIndexRoute
   '/data/': typeof DataIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/starfinder/': typeof StarfinderIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar/' | '/data/' | '/settings/'
+  fullPaths: '/' | '/calendar/' | '/data/' | '/settings/' | '/starfinder/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar' | '/data' | '/settings'
-  id: '__root__' | '/' | '/calendar/' | '/data/' | '/settings/'
+  to: '/' | '/calendar' | '/data' | '/settings' | '/starfinder'
+  id: '__root__' | '/' | '/calendar/' | '/data/' | '/settings/' | '/starfinder/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   CalendarIndexRoute: typeof CalendarIndexRoute
   DataIndexRoute: typeof DataIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  StarfinderIndexRoute: typeof StarfinderIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/starfinder/': {
+      id: '/starfinder/'
+      path: '/starfinder'
+      fullPath: '/starfinder/'
+      preLoaderRoute: typeof StarfinderIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/': {
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarIndexRoute: CalendarIndexRoute,
   DataIndexRoute: DataIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  StarfinderIndexRoute: StarfinderIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
