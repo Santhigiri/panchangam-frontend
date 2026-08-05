@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
+import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon, Telescope } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "@/components/shared/LoginDialog";
 import ThemeToggle from "@/components/shared/ThemeToggle";
@@ -15,6 +15,7 @@ type NavItemProps = {
 const baseNavItems: Array<NavItemProps> = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/calendar", icon: Calendar, label: "Calendar" },
+  { to: "/starfinder", icon: Telescope, label: "Starfinder" },
 ];
 
 const adminNavItems: Array<NavItemProps> = [
