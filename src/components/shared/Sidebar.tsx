@@ -25,7 +25,7 @@ const adminNavItems: Array<NavItemProps> = [
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { isAuthenticated, username, role, logout } = useAuth();
+  const { isAuthenticated, isVerifying, username, role, logout } = useAuth();
   const { isMobileMenuOpen, closeMobileMenu } = useMobileSidebar();
   const navigate = useNavigate();
   const navItems = role === "admin" ? [...baseNavItems, ...adminNavItems] : baseNavItems;
@@ -103,7 +103,7 @@ export default function Sidebar() {
 
         <div className="w-full mt-auto p-2 border-t border-sidebar-border">
           <ThemeToggle showLabel={showLabels} />
-          {isAuthenticated ? (
+          {isVerifying ? null : isAuthenticated ? (
             <button
               type="button"
               onClick={handleLogout}
