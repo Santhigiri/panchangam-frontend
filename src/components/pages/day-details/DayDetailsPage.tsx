@@ -2,11 +2,14 @@ import { addDays } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import DateHeader from "../calendar/DateHeader";
+import DateHeaderSkeleton from "../calendar/DateHeaderSkeleton";
 import SunriseSunsetCard from "../calendar/SunriseSunsetCard";
 import SunriseSunsetCardSkeleton from "../calendar/SunriseSunsetCardSkeleton";
 import ThithiTransitionCard from "../calendar/ThithiTransitionCard";
 import { NakshatraTransitionCard } from "../calendar/NakshatraTransitionCard";
+import { CompactTransitionRowSkeleton } from "../calendar/CompactTransitionRowSkeleton";
 import UpcomingEventsCard from "../calendar/UpcomingEventsCard";
+import UpcomingEventsCardSkeleton from "../calendar/UpcomingEventsCardSkeleton";
 import GuruvaniCard from "./GuruvaniCard";
 import type { DayButton } from "react-day-picker";
 import type { ComponentProps } from "react";
@@ -42,7 +45,7 @@ function DatePickerDayButton({ className, modifiers, ...props }: ComponentProps<
 }
 
 export default function DayDetailsPage() {
-  const { activeDate, setActiveDate, activeDateData, upcomingEvents } = useHomePanchangam();
+  const { activeDate, setActiveDate, activeDateData, upcomingEvents, isLoading } = useHomePanchangam();
   const { sunrise, sunset, timeZone } = useLocalSunriseSunset(activeDate);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
@@ -92,26 +95,28 @@ export default function DayDetailsPage() {
 
       <div className="grid grid-cols-2 justify-items-stretch gap-2">
 
-        {activeDateData && (
-          <div className="col-span-2">
-            <div className="flex flex-row justify-center items-center">
-              <ChevronLeft
-                className="w-8 h-8 cursor-pointer"
-                onClick={() => setActiveDate(addDays(activeDate, -1))}
-              />
-              <div className="flex-1">
+        <div className="col-span-2">
+          <div className="flex flex-row justify-center items-center">
+            <ChevronLeft
+              className="w-8 h-8 cursor-pointer"
+              onClick={() => setActiveDate(addDays(activeDate, -1))}
+            />
+            <div className="flex-1">
+              {activeDateData ? (
                 <DateHeader
                   date={activeDate}
                   kv_date={activeDateData.kv}
                 />
-              </div>
-              <ChevronRight
-                className="w-8 h-8 cursor-pointer"
-                onClick={() => setActiveDate(addDays(activeDate, 1))}
-              />
+              ) : (
+                <DateHeaderSkeleton />
+              )}
             </div>
+            <ChevronRight
+              className="w-8 h-8 cursor-pointer"
+              onClick={() => setActiveDate(addDays(activeDate, 1))}
+            />
           </div>
-        )}
+        </div>
 
         <div className="col-span-2">
           <GuruvaniCard />
@@ -125,27 +130,35 @@ export default function DayDetailsPage() {
           )}
         </div>
 
-        {activeDateData && (
-          <>
-            <div className="col-span-2">
-              <ThithiTransitionCard
-                transitions={activeDateData.thithi_transitions}
-                current_thithi={activeDateData.thithi}
-              />
-            </div>
+        <div className="col-span-2">
+          {activeDateData ? (
+            <ThithiTransitionCard
+              transitions={activeDateData.thithi_transitions}
+              current_thithi={activeDateData.thithi}
+            />
+          ) : (
+            <CompactTransitionRowSkeleton />
+          )}
+        </div>
 
-            <div className="col-span-2">
-              <NakshatraTransitionCard
-                transitions={activeDateData.nakshatra_transitions}
-                current_nakshatra={activeDateData.nakshatra}
-              />
-            </div>
+        <div className="col-span-2">
+          {activeDateData ? (
+            <NakshatraTransitionCard
+              transitions={activeDateData.nakshatra_transitions}
+              current_nakshatra={activeDateData.nakshatra}
+            />
+          ) : (
+            <CompactTransitionRowSkeleton />
+          )}
+        </div>
 
-            <div className="col-span-2">
-              <UpcomingEventsCard events={upcomingEvents} />
-            </div>
-          </>
-        )}
+        <div className="col-span-2">
+          {isLoading ? (
+            <UpcomingEventsCardSkeleton />
+          ) : (
+            <UpcomingEventsCard events={upcomingEvents} />
+          )}
+        </div>
       </div>
     </div>
   );
