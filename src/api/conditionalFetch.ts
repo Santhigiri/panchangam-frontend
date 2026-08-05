@@ -3,13 +3,18 @@ import type * as z from "zod"
 
 type FetchWithEtagOptions<T> = {
   onBackgroundUpdate?: (data: T) => void
+  credentials?: RequestCredentials
+  // Called for a non-ok, non-304 response before the generic fallback error
+  // is thrown — lets callers surface endpoint-specific errors (401/403/404).
+  handleErrors?: (response: Response) => Promise<void>
 }
 
 async function fetchAndCache<T>(
   url: string,
   cacheKey: string,
   schema: z.ZodType<T>,
-  etag: string | null
+  etag: string | null,
+  options: Pick<FetchWithEtagOptions<T>, "credentials" | "handleErrors">
 ): Promise<T | null> {
   const response = await fetch(url, {
     method: "GET",
@@ -17,6 +22,7 @@ async function fetchAndCache<T>(
       Accept: "application/json",
       ...(etag ? { "If-None-Match": etag } : {}),
     },
+    ...(options.credentials ? { credentials: options.credentials } : {}),
   })
 
   if (response.status === 304) {
@@ -24,6 +30,7 @@ async function fetchAndCache<T>(
   }
 
   if (!response.ok) {
+    await options.handleErrors?.(response)
     throw new Error(`Failed to fetch ${url}`)
   }
 
@@ -55,7 +62,7 @@ export async function fetchWithEtag<T>(
       // background. A 304 means nothing changed; a 200 updates the cache and
       // notifies the caller so it can update its own state (e.g. push the
       // fresh data into a React Query cache).
-      void fetchAndCache(url, cacheKey, schema, cached.etag)
+      void fetchAndCache(url, cacheKey, schema, cached.etag, options)
         .then((data) => {
           if (data !== null) options.onBackgroundUpdate?.(data)
         })
@@ -72,7 +79,7 @@ export async function fetchWithEtag<T>(
     }
   }
 
-  const data = await fetchAndCache(url, cacheKey, schema, null)
+  const data = await fetchAndCache(url, cacheKey, schema, null, options)
   if (data === null) {
     // Unreachable in practice — a 304 only ever comes back when we sent an
     // ETag, which only happens in the cached branch above.
