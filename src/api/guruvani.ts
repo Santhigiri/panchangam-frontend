@@ -1,4 +1,5 @@
 import * as z from "zod"
+import { readGuruvaniOfTheDay, writeGuruvaniOfTheDay } from "./guruvaniCache"
 import { ForbiddenError, UnauthorizedError } from "./panchangamGeneration"
 import { guruvani } from "./schemas/guruvani"
 import type { Guruvani, GuruvaniFormValues } from "./schemas/guruvani"
@@ -48,6 +49,23 @@ export async function getRandomGuruvani(): Promise<Guruvani> {
   await handleErrors(response)
   const json = await response.json()
   return guruvani.parseAsync(json)
+}
+
+// Persists one random quote per calendar day so reloads don't swap it
+// mid-day — a fresh quote is only picked once the caller passes a new day-key.
+export async function getGuruvaniOfTheDay(dayKey: string): Promise<Guruvani> {
+  const cached = await readGuruvaniOfTheDay(dayKey)
+  if (cached) {
+    try {
+      return guruvani.parse(cached)
+    } catch {
+      // Cached payload no longer matches the schema — fall through to a fresh fetch.
+    }
+  }
+
+  const data = await getRandomGuruvani()
+  await writeGuruvaniOfTheDay(dayKey, data)
+  return data
 }
 
 export async function createGuruvani(values: GuruvaniFormValues): Promise<Guruvani> {

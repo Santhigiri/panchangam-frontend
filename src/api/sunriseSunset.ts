@@ -1,5 +1,6 @@
 import type { SunriseSunsetData } from "@/api/schemas/sunriseSunset"
 import { sunriseSunsetData } from "@/api/schemas/sunriseSunset"
+import { readSunriseSunsetCache, writeSunriseSunsetCache } from "@/api/sunriseSunsetCache"
 import { dateToKey } from "@/hooks/homepage/useCalendarPanchangam"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
@@ -9,8 +10,22 @@ export async function getSunriseSunset(
   latitude: number,
   longitude: number
 ): Promise<SunriseSunsetData> {
+  const dayKey = dateToKey(day)
+
+  // Sunrise/sunset is deterministic for a given (day, location) — once
+  // fetched it never changes, so a cache hit skips the network entirely
+  // rather than revalidating in the background.
+  const cached = await readSunriseSunsetCache(dayKey, latitude, longitude)
+  if (cached) {
+    try {
+      return sunriseSunsetData.parse(cached)
+    } catch {
+      // Cached payload no longer matches the schema — fall through to a fresh fetch.
+    }
+  }
+
   const params = new URLSearchParams({
-    day: dateToKey(day),
+    day: dayKey,
     latitude: String(latitude),
     longitude: String(longitude),
   })
@@ -24,5 +39,7 @@ export async function getSunriseSunset(
   }
 
   const json = await response.json()
-  return sunriseSunsetData.parse(json)
+  const data = sunriseSunsetData.parse(json)
+  await writeSunriseSunsetCache(dayKey, latitude, longitude, json)
+  return data
 }
