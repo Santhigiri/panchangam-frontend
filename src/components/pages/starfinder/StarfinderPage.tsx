@@ -1,12 +1,9 @@
 import { useState } from "react"
 import { CalendarIcon } from "lucide-react"
-import DateHeader from "../calendar/DateHeader"
-import DateHeaderSkeleton from "../calendar/DateHeaderSkeleton"
-import SunriseSunsetCard from "../calendar/SunriseSunsetCard"
-import SunriseSunsetCardSkeleton from "../calendar/SunriseSunsetCardSkeleton"
-import ThithiTransitionCard from "../calendar/ThithiTransitionCard"
-import { NakshatraTransitionCard } from "../calendar/NakshatraTransitionCard"
-import { CompactTransitionRowSkeleton } from "../calendar/CompactTransitionRowSkeleton"
+import StarfinderResultPanel from "./StarfinderResultPanel"
+import StarfinderResultPanelSkeleton from "./StarfinderResultPanelSkeleton"
+import StarfinderTransitionsTabs from "./StarfinderTransitionsTabs"
+import StarfinderTransitionsTabsSkeleton from "./StarfinderTransitionsTabsSkeleton"
 import type { FormEvent } from "react"
 import type { StarfinderParams } from "@/hooks/useStarfinder"
 import TopAppBar from "@/components/shared/TopAppBar"
@@ -25,7 +22,6 @@ export default function StarfinderPage() {
   const [date, setDate] = useState<Date>(new Date())
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [timeOfDay, setTimeOfDay] = useState("12:00")
-  const [locationLabel, setLocationLabel] = useState("")
   const [latitude, setLatitude] = useState("")
   const [longitude, setLongitude] = useState("")
   const [submitted, setSubmitted] = useState<StarfinderParams | null>(null)
@@ -105,17 +101,6 @@ export default function StarfinderPage() {
                 />
               </Field>
 
-              <Field>
-                <FieldLabel htmlFor="starfinder-location">Location name</FieldLabel>
-                <Input
-                  id="starfinder-location"
-                  type="text"
-                  placeholder="e.g. Kochi, Kerala"
-                  value={locationLabel}
-                  onChange={(event) => setLocationLabel(event.target.value)}
-                />
-              </Field>
-
               <Field orientation="responsive">
                 <FieldContent>
                   <FieldLabel htmlFor="starfinder-latitude">Latitude</FieldLabel>
@@ -156,61 +141,34 @@ export default function StarfinderPage() {
       </form>
 
       {submitted && (
-        <div className="grid grid-cols-2 justify-items-stretch gap-2 px-2">
+        <div className="flex flex-col gap-3 px-2">
           {query.isError ? (
-            <div className="col-span-2">
-              <p className="text-center text-sm text-destructive">
-                {query.error instanceof Error ? query.error.message : "Something went wrong."}
-              </p>
-            </div>
+            <p className="text-center text-sm text-destructive">
+              {query.error instanceof Error ? query.error.message : "Something went wrong."}
+            </p>
+          ) : enriched ? (
+            <>
+              <StarfinderResultPanel
+                queriedDate={submitted.day}
+                timeOfDay={submitted.timeOfDay}
+                kv={enriched.kv}
+                nakshatra={enriched.nakshatra}
+                thithi={enriched.thithi}
+                sunrise={enriched.sunrise}
+                sunset={enriched.sunset}
+                timeZone={submitted.timezone}
+              />
+              <StarfinderTransitionsTabs
+                thithiTransitions={enriched.thithi_transitions}
+                currentThithi={enriched.thithi}
+                nakshatraTransitions={enriched.nakshatra_transitions}
+                currentNakshatra={enriched.nakshatra}
+              />
+            </>
           ) : (
             <>
-              <div className="col-span-2">
-                {locationLabel && (
-                  <p className="text-center font-inter text-sm font-medium text-secondary">
-                    {locationLabel}
-                  </p>
-                )}
-                {enriched ? (
-                  <DateHeader date={submitted.day} kv_date={enriched.kv} />
-                ) : (
-                  <DateHeaderSkeleton />
-                )}
-              </div>
-
-              <div className="col-span-2">
-                {enriched ? (
-                  <SunriseSunsetCard
-                    sunrise={enriched.sunrise}
-                    sunset={enriched.sunset}
-                    timeZone={submitted.timezone}
-                  />
-                ) : (
-                  <SunriseSunsetCardSkeleton />
-                )}
-              </div>
-
-              <div className="col-span-2">
-                {enriched ? (
-                  <ThithiTransitionCard
-                    transitions={enriched.thithi_transitions}
-                    current_thithi={enriched.thithi}
-                  />
-                ) : (
-                  <CompactTransitionRowSkeleton />
-                )}
-              </div>
-
-              <div className="col-span-2">
-                {enriched ? (
-                  <NakshatraTransitionCard
-                    transitions={enriched.nakshatra_transitions}
-                    current_nakshatra={enriched.nakshatra}
-                  />
-                ) : (
-                  <CompactTransitionRowSkeleton />
-                )}
-              </div>
+              <StarfinderResultPanelSkeleton />
+              <StarfinderTransitionsTabsSkeleton />
             </>
           )}
         </div>
