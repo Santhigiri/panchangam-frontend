@@ -1,10 +1,12 @@
 import { createContext, useContext } from "react"
 import { ChevronLeft, ChevronRight, InfoIcon, SunriseIcon, SunsetIcon } from "lucide-react";
 import DateHeader from "./DateHeader";
+import CalendarGridSkeleton from "./CalendarGridSkeleton";
 import type { ComponentProps } from "react"
 import type { PanchangamDayData } from "@/api/schemas/panchangamData";
 import type { DayButton } from "react-day-picker";
 import { dateToKey, useCalendarPanchangam } from "@/hooks/homepage/useCalendarPanchangam";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   HoverCard,
   HoverCardContent,
@@ -228,8 +230,21 @@ export default function CalendarCustomDays() {
     return (
       <div className="flex flex-col items-stretch">
         <TopAppBar title="Calendar" />
-        <div className="flex items-center justify-center h-full">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-full flex flex-col gap-2 items-center">
+          <div className="w-full">
+            <CalendarGridSkeleton />
+            <div className="grid grid-flow-rows auto-rows-min mt-2 gap-1">
+              {Array.from({ length: 2 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-row items-center gap-4 border-b border-primary/20 px-2 py-1.5 last:border-b-0"
+                >
+                  <Skeleton className="h-4 w-6" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     )
