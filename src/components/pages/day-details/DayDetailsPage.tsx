@@ -118,12 +118,8 @@ export default function DayDetailsPage() {
         </div>
 
         <div className="col-span-2">
-          {activeDateData ? (
-            <SunriseSunsetCard
-              sunrise={sunrise ?? activeDateData.sunrise}
-              sunset={sunset ?? activeDateData.sunset}
-              timeZone={timeZone}
-            />
+          {sunrise && sunset ? (
+            <SunriseSunsetCard sunrise={sunrise} sunset={sunset} timeZone={timeZone} />
           ) : (
             <SunriseSunsetCardSkeleton />
           )}
