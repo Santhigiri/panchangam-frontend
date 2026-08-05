@@ -1,4 +1,5 @@
 import { loginResponse } from "./schemas/auth"
+import type { LoginResponse } from "./schemas/auth"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -39,4 +40,33 @@ export async function logout() {
     method: "POST",
     credentials: "include",
   })
+}
+
+// A 401 here is an expected outcome (no/expired access token), not an error
+// condition, so it's reported via a null return rather than a throw.
+export async function getCurrentUser(): Promise<LoginResponse | null> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/auth/me`, {
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  })
+
+  if (response.status === 401) {
+    return null
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch current user")
+  }
+
+  const json = await response.json()
+  return loginResponse.parseAsync(json)
+}
+
+// Exchanges the refresh-token cookie for a fresh access + refresh pair.
+export async function refreshSession(): Promise<boolean> {
+  const response = await fetch(`${APP_BASE_URL}/api/v1/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+  })
+  return response.status === 204
 }

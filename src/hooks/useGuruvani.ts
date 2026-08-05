@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { getGuruvanis, getRandomGuruvani } from "@/api/guruvani"
+import { getGuruvaniOfTheDay, getGuruvanis } from "@/api/guruvani"
+import { dateToKey } from "@/hooks/homepage/useCalendarPanchangam"
 
 export function useGuruvanis() {
   return useQuery({
@@ -8,13 +9,18 @@ export function useGuruvanis() {
   })
 }
 
-const RANDOM_GURUVANI_STALE_TIME = 1000 * 60 * 5 // 5 minutes, revisit once traffic patterns are known
-
 export function useRandomGuruvani() {
+  const dayKey = dateToKey(new Date())
+
+  // The day-key in the query key is what "invalidates" this on a day
+  // rollover — a new day naturally produces a new query rather than
+  // refetching under the same key. staleTime: Infinity means TanStack Query
+  // never refetches within the day; getGuruvaniOfTheDay's IndexedDB cache is
+  // what makes the day's pick survive reloads/app restarts.
   return useQuery({
-    queryKey: ["guruvani-random"],
-    queryFn: getRandomGuruvani,
-    staleTime: RANDOM_GURUVANI_STALE_TIME,
+    queryKey: ["guruvani-random", dayKey],
+    queryFn: () => getGuruvaniOfTheDay(dayKey),
+    staleTime: Infinity,
     retry: false,
   })
 }
