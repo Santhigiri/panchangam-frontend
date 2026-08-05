@@ -1,6 +1,9 @@
 import { ForbiddenError, UnauthorizedError } from "./panchangamGeneration"
 import { appSetting, appSettingList } from "./schemas/appSettings"
+import { fetchWithEtag } from "./conditionalFetch"
 import type { AppSetting } from "./schemas/appSettings"
+
+export const APP_SETTINGS_CACHE_KEY = "app-settings"
 
 const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -33,15 +36,17 @@ async function handleErrors(response: Response) {
 
 // Every /api/v1/settings endpoint requires the admin role, including reads
 // (see panchangam-api's api/routes/v1/settings.py), so both of these send
-// credentials.
-export async function getAppSettings(): Promise<Array<AppSetting>> {
-  const response = await fetch(`${APP_BASE_URL}/api/v1/settings`, {
-    headers: { Accept: "application/json" },
+// credentials. The list is now ETag-validated: fetchWithEtag hands back the
+// cached value instantly (if any) and revalidates in the background via
+// onBackgroundUpdate.
+export function getAppSettings(
+  onBackgroundUpdate?: (data: Array<AppSetting>) => void
+): Promise<Array<AppSetting>> {
+  return fetchWithEtag(`${APP_BASE_URL}/api/v1/settings`, APP_SETTINGS_CACHE_KEY, appSettingList, {
     credentials: "include",
+    handleErrors,
+    onBackgroundUpdate,
   })
-  await handleErrors(response)
-  const json = await response.json()
-  return appSettingList.parseAsync(json)
 }
 
 export async function updateAppSetting(
