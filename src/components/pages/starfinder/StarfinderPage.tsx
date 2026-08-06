@@ -16,7 +16,7 @@ import { useReferenceMaps } from "@/hooks/homepage/useReferenceMaps"
 import { Button } from "@/components/ui/button"
 import { useStarfinder } from "@/hooks/useStarfinder"
 import { enrichPanchangamDay } from "@/lib/enrichPanchangamData"
-import { APP_TIMEZONE, CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants"
+import { APP_TIMEZONE, CALENDAR_END_DATE, STARFINDER_START_DATE } from "@/lib/constants"
 
 export default function StarfinderPage() {
   const [date, setDate] = useState<Date>(new Date())
@@ -81,10 +81,10 @@ export default function StarfinderPage() {
                         captionLayout="dropdown"
                         selected={date}
                         defaultMonth={date}
-                        startMonth={CALENDAR_START_DATE}
+                        startMonth={STARFINDER_START_DATE}
                         endMonth={CALENDAR_END_DATE}
                         disabled={(day) =>
-                          day < CALENDAR_START_DATE || day > CALENDAR_END_DATE
+                          day < STARFINDER_START_DATE || day > CALENDAR_END_DATE
                         }
                         onSelect={(selected) => {
                           if (selected) {
