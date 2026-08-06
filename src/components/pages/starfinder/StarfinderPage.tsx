@@ -9,7 +9,7 @@ import type { StarfinderParams } from "@/hooks/useStarfinder"
 import TopAppBar from "@/components/shared/TopAppBar"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card"
-import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useReferenceMaps } from "@/hooks/homepage/useReferenceMaps"
@@ -56,59 +56,59 @@ export default function StarfinderPage() {
         <Card className="rounded-md py-4">
           <CardContent className="px-4">
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="starfinder-date">Date</FieldLabel>
-                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="starfinder-date"
-                      type="button"
-                      variant="outline"
-                      className="justify-start"
-                    >
-                      <CalendarIcon />
-                      {date.toLocaleDateString("default", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      captionLayout="dropdown"
-                      selected={date}
-                      defaultMonth={date}
-                      startMonth={CALENDAR_START_DATE}
-                      endMonth={CALENDAR_END_DATE}
-                      disabled={(day) =>
-                        day < CALENDAR_START_DATE || day > CALENDAR_END_DATE
-                      }
-                      onSelect={(selected) => {
-                        if (selected) {
-                          setDate(selected)
-                          setDatePickerOpen(false)
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="starfinder-date">Date</FieldLabel>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="starfinder-date"
+                        type="button"
+                        variant="outline"
+                        className="justify-start"
+                      >
+                        <CalendarIcon />
+                        {date.toLocaleDateString("default", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        selected={date}
+                        defaultMonth={date}
+                        startMonth={CALENDAR_START_DATE}
+                        endMonth={CALENDAR_END_DATE}
+                        disabled={(day) =>
+                          day < CALENDAR_START_DATE || day > CALENDAR_END_DATE
                         }
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </Field>
+                        onSelect={(selected) => {
+                          if (selected) {
+                            setDate(selected)
+                            setDatePickerOpen(false)
+                          }
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="starfinder-time">Time</FieldLabel>
-                <Input
-                  id="starfinder-time"
-                  type="time"
-                  value={timeOfDay}
-                  onChange={(event) => setTimeOfDay(event.target.value)}
-                  required
-                />
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="starfinder-time">Time</FieldLabel>
+                  <Input
+                    id="starfinder-time"
+                    type="time"
+                    value={timeOfDay}
+                    onChange={(event) => setTimeOfDay(event.target.value)}
+                    required
+                  />
+                </Field>
 
-              <Field orientation="responsive">
-                <FieldContent>
+                <Field>
                   <FieldLabel htmlFor="starfinder-latitude">Latitude</FieldLabel>
                   <Input
                     id="starfinder-latitude"
@@ -121,8 +121,9 @@ export default function StarfinderPage() {
                     onChange={(event) => setLatitude(event.target.value)}
                     required
                   />
-                </FieldContent>
-                <FieldContent>
+                </Field>
+
+                <Field>
                   <FieldLabel htmlFor="starfinder-longitude">Longitude</FieldLabel>
                   <Input
                     id="starfinder-longitude"
@@ -135,8 +136,8 @@ export default function StarfinderPage() {
                     onChange={(event) => setLongitude(event.target.value)}
                     required
                   />
-                </FieldContent>
-              </Field>
+                </Field>
+              </div>
 
               <Button type="submit" disabled={!isValid || query.isFetching}>
                 {query.isFetching ? "Finding…" : "Find"}
