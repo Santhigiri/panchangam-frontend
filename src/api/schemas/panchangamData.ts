@@ -72,6 +72,7 @@ export const kollavarsham = z.object({
 export type KollavarshamDate = z.infer<typeof kollavarsham>
 
 export const santhigiri_significance = z.object({
+  id: z.string(),
   name: z.string(),
   description: z.string()
 })

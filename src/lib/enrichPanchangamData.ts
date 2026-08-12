@@ -37,7 +37,7 @@ function masaOrFallback(map: Map<string, Masa>, code: string): Masa {
 
 function eventOrFallback(map: Map<string, SanthigiriEvent>, id: string): SanthigiriSignificance {
   const event = map.get(id)
-  return event ? { name: event.name, description: event.description } : { name: id, description: "" }
+  return event ? { id: id, name: event.name, description: event.description } : { id: id, name: id, description: "" }
 }
 
 export function enrichPanchangamDay(

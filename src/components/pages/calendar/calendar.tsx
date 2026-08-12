@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { APP_TIMEZONE, CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
+import { APP_TIMEZONE, CALENDAR_END_DATE, CALENDAR_START_DATE, POURNAMI_EVENT_ID } from "@/lib/constants";
 import { cn, getFormattedTime } from "@/lib/utils";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
@@ -85,7 +85,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
   const ctx = useContext(CalendarDataContext)
   const key = dateToKey(day.date)
   const dateData = ctx?.monthData?.[key]
-  const isPournami = dateData?.santhigiri_significant_dates.some(e => e.name === "Pournami") ?? false
+  const isPournami = dateData?.santhigiri_significant_dates.some(e => e.id === POURNAMI_EVENT_ID) ?? false
   const isNeighbouringMonth = ctx ? day.date.getMonth() !== ctx.activeMonth.getMonth() : false
 
   const button = (
