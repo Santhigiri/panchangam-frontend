@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
+import { APP_TIMEZONE, CALENDAR_END_DATE, CALENDAR_START_DATE } from "@/lib/constants";
 import { cn, getFormattedTime } from "@/lib/utils";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
@@ -54,11 +54,11 @@ function DayDetailsHoverContent({ date, data }: { date: Date; data: PanchangamDa
       <div className="flex flex-row justify-between text-xs font-inter text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <SunriseIcon className="h-3.5 w-3.5" />
-          {getFormattedTime(data.sunrise, 'Asia/Kolkata')}
+          {getFormattedTime(data.sunrise, APP_TIMEZONE)}
         </div>
         <div className="flex items-center gap-1.5">
           <SunsetIcon className="h-3.5 w-3.5" />
-          {getFormattedTime(data.sunset, 'Asia/Kolkata')}
+          {getFormattedTime(data.sunset, APP_TIMEZONE)}
         </div>
       </div>
       <div className="flex flex-col gap-0.5 text-xs">
@@ -104,7 +104,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       onClick={(e) => e.preventDefault()}
     >
       {dateData?.kv.kv_day === 1 ? (
-        <p className="bg-primary text-[8px] lg:text-[12px] font-bold text-primary-foreground w-full text-center leading-snug break-words">
+        <p className="bg-primary text-[8px] lg:text-[12px] font-bold mb-1 text-primary-foreground w-full text-center leading-snug break-words">
           {dateData.kv.kv_month_name_ml}
         </p>
       ) : (
