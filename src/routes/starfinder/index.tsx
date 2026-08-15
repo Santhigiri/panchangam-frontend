@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import StarfinderPage from '@/components/pages/starfinder/StarfinderPage'
+import StarfinderPage from '@/features/starfinder/components/StarfinderPage'
 
 export const Route = createFileRoute('/starfinder/')({
   component: StarfinderPage,

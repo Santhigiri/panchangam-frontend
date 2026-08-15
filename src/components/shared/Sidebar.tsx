@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon, Telescope } from "lucide-react";
 import { useState } from "react";
-import { LoginDialog } from "@/components/shared/LoginDialog";
+import { LoginDialog } from "@/features/auth/components/LoginDialog";
 import ThemeToggle from "@/components/shared/ThemeToggle";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 
 type NavItemProps = {

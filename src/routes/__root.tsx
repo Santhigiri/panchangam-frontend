@@ -5,7 +5,7 @@ import { queryClient } from "@/lib/query-client"
 import { RefreshPrompt } from "@/components/shared/RefreshPrompt"
 import Sidebar from "@/components/shared/Sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { AuthProvider } from "@/hooks/useAuth"
+import { AuthProvider } from "@/features/auth/hooks/useAuth"
 import { MobileSidebarProvider } from "@/hooks/useMobileSidebar"
 
 export const Route = createRootRoute({
