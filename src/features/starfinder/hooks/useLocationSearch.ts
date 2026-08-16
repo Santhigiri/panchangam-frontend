@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { searchLocations } from "@/features/starfinder/api/locationSearch"
 
 const MIN_QUERY_LENGTH = 3
-const DEBOUNCE_MS = 400
+const DEBOUNCE_MS = 1000
 
 export function useLocationSearch(query: string) {
   const [debouncedQuery, setDebouncedQuery] = useState("")
