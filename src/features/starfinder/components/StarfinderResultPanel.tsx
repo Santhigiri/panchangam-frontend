@@ -4,6 +4,7 @@ import type { KollavarshamDate, Nakshatra, Thithi } from "@/features/panchangam/
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { getFormattedTime } from "@/lib/utils"
+import { dateToKey, zonedTimeToUtc } from "@/lib/date"
 
 type StarfinderResultPanelProps = {
   queriedDate: Date
@@ -26,10 +27,19 @@ export default function StarfinderResultPanel({
   sunset,
   timeZone,
 }: StarfinderResultPanelProps) {
-  const totalMinutes = differenceInMinutes(parseISO(sunset), parseISO(sunrise))
+  const sunriseDate = parseISO(sunrise)
+  const sunsetDate = parseISO(sunset)
+  const queriedInstant = zonedTimeToUtc(dateToKey(queriedDate), timeOfDay, timeZone)
+
+  const totalMinutes = differenceInMinutes(sunsetDate, sunriseDate)
   const daylightMinutes = ((totalMinutes % 1440) + 1440) % 1440
   const daylightHours = Math.floor(daylightMinutes / 60)
   const daylightRemainderMinutes = daylightMinutes % 60
+
+  const elapsedMinutes = differenceInMinutes(queriedInstant, sunriseDate)
+  const progress = daylightMinutes > 0
+    ? Math.min(1, Math.max(0, elapsedMinutes / daylightMinutes))
+    : 0
 
   return (
     <Card className="rounded-xl py-5">
@@ -73,9 +83,9 @@ export default function StarfinderResultPanel({
               <SunsetIcon className="h-4 w-4 text-primary" />
             </div>
           </div>
-          <Progress value={(daylightMinutes / 1440) * 100} className="h-1.5" />
+          <Progress value={progress * 100} className="h-1.5" />
           <p className="text-center font-inter text-xs text-muted-foreground">
-            daylight · {daylightHours}h {daylightRemainderMinutes}m of 24h
+            daylight · {daylightHours}h {daylightRemainderMinutes}m
           </p>
         </div>
       </CardContent>
