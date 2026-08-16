@@ -2,8 +2,9 @@ import { useState } from "react"
 import { CalendarIcon, MapPinIcon } from "lucide-react"
 import StarfinderResultPanel from "./StarfinderResultPanel"
 import StarfinderResultPanelSkeleton from "./StarfinderResultPanelSkeleton"
-import StarfinderTransitionsTabs from "./StarfinderTransitionsTabs"
-import StarfinderTransitionsTabsSkeleton from "./StarfinderTransitionsTabsSkeleton"
+import StarfinderThithiTransitionsCard from "./StarfinderThithiTransitionsCard"
+import StarfinderNakshatraTransitionsCard from "./StarfinderNakshatraTransitionsCard"
+import StarfinderTransitionsCardsSkeleton from "./StarfinderTransitionsCardsSkeleton"
 import type { FormEvent } from "react"
 import type { LocationSearchResult } from "@/features/starfinder/schemas/locationSearchResult"
 import type { StarfinderParams } from "@/features/starfinder/hooks/useStarfinder"
@@ -212,17 +213,19 @@ export default function StarfinderPage() {
                 sunset={enriched.sunset}
                 timeZone={submitted.timezone}
               />
-              <StarfinderTransitionsTabs
-                thithiTransitions={enriched.thithi_transitions}
+              <StarfinderThithiTransitionsCard
+                transitions={enriched.thithi_transitions}
                 currentThithi={enriched.thithi}
-                nakshatraTransitions={enriched.nakshatra_transitions}
+              />
+              <StarfinderNakshatraTransitionsCard
+                transitions={enriched.nakshatra_transitions}
                 currentNakshatra={enriched.nakshatra}
               />
             </>
           ) : (
             <>
               <StarfinderResultPanelSkeleton />
-              <StarfinderTransitionsTabsSkeleton />
+              <StarfinderTransitionsCardsSkeleton />
             </>
           )}
         </div>
