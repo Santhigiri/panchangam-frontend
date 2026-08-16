@@ -69,7 +69,7 @@ export default function StarfinderPage() {
           <CardContent className="px-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="starfinder-location-search">Search location</FieldLabel>
+                <FieldLabel htmlFor="starfinder-location-search">Location</FieldLabel>
                 <Popover open={locationResultsOpen} onOpenChange={setLocationResultsOpen}>
                   <PopoverAnchor asChild>
                     <div className="relative">
@@ -126,6 +126,11 @@ export default function StarfinderPage() {
                     )}
                   </PopoverContent>
                 </Popover>
+                {latitude && longitude && (
+                  <p className="text-sm text-muted-foreground">
+                    {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
+                  </p>
+                )}
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
@@ -176,36 +181,6 @@ export default function StarfinderPage() {
                     type="time"
                     value={timeOfDay}
                     onChange={(event) => setTimeOfDay(event.target.value)}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="starfinder-latitude">Latitude</FieldLabel>
-                  <Input
-                    id="starfinder-latitude"
-                    type="number"
-                    step="any"
-                    min={-90}
-                    max={90}
-                    placeholder="-90 to 90"
-                    value={latitude}
-                    onChange={(event) => setLatitude(event.target.value)}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="starfinder-longitude">Longitude</FieldLabel>
-                  <Input
-                    id="starfinder-longitude"
-                    type="number"
-                    step="any"
-                    min={-180}
-                    max={180}
-                    placeholder="-180 to 180"
-                    value={longitude}
-                    onChange={(event) => setLongitude(event.target.value)}
                     required
                   />
                 </Field>
