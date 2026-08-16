@@ -13,7 +13,7 @@ export default function StarfinderNakshatraTransitionsCard({
   currentNakshatra,
 }: StarfinderNakshatraTransitionsCardProps) {
   return (
-    <Card className="rounded-xl py-4 gap-2">
+    <Card className="rounded-xl py-4 gap-2 mb-2">
       <CardHeader>
         <p className="font-semibold text-sm">Nakshatra Transitions</p>
       </CardHeader>

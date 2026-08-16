@@ -149,7 +149,7 @@ export default function Sidebar() {
               <Link
                 key={to}
                 to={to}
-                className="flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-md transition-colors hover:bg-sidebar-accent"
+                className="flex flex-col items-center justify-center gap-1 pb-2 px-4 rounded-md transition-colors hover:bg-sidebar-accent"
               >
                 {({ isActive }) => (
                   <>
