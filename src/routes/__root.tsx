@@ -5,7 +5,7 @@ import { queryClient } from "@/lib/query-client"
 import { RefreshPrompt } from "@/components/shared/RefreshPrompt"
 import Sidebar from "@/components/shared/Sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { AuthProvider } from "@/hooks/useAuth"
+import { AuthProvider } from "@/features/auth/hooks/useAuth"
 import { MobileSidebarProvider } from "@/hooks/useMobileSidebar"
 
 export const Route = createRootRoute({
@@ -43,7 +43,7 @@ function RootComponent() {
     <RootDocument>
       <div className="flex h-dvh w-full bg-card overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-2 pb-16 md:ml-16 md:pb-2">
+        <main className="flex-1 overflow-y-auto overscroll-y-contain p-2 pb-16 md:ml-16 md:pb-2">
           <Outlet /> {/* Child routes render here */}
         </main>
       </div>

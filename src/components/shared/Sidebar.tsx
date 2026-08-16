@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon } from "lucide-react";
+import { Home, Calendar, Database, Settings, Menu, X, type LucideIcon, User, LogOutIcon, Telescope } from "lucide-react";
 import { useState } from "react";
-import { LoginDialog } from "@/components/shared/LoginDialog";
+import { LoginDialog } from "@/features/auth/components/LoginDialog";
 import ThemeToggle from "@/components/shared/ThemeToggle";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 
 type NavItemProps = {
@@ -13,8 +13,9 @@ type NavItemProps = {
 };
 
 const baseNavItems: Array<NavItemProps> = [
-  { to: "/", icon: Home, label: "Home" },
   { to: "/calendar", icon: Calendar, label: "Calendar" },
+  { to: "/", icon: Home, label: "Home" },
+  { to: "/starfinder", icon: Telescope, label: "Starfinder" },
 ];
 
 const adminNavItems: Array<NavItemProps> = [
@@ -30,6 +31,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const navItems = role === "admin" ? [...baseNavItems, ...adminNavItems] : baseNavItems;
   const showLabels = !isCollapsed || isMobileMenuOpen;
+  const gridColsClass = navItems.length === 5 ? "grid-cols-5" : "grid-cols-3";
 
   function handleLogout() {
     logout();
@@ -56,7 +58,7 @@ export default function Sidebar() {
         className={`
           flex flex-col fixed left-0 top-0 bottom-16 md:bottom-0 bg-sidebar drop-shadow-sm
           text-sidebar-foreground transition-all duration-300 ease-in-out z-50 overflow-hidden
-          ${isMobileMenuOpen ? "w-64" : "w-0"}
+          ${isMobileMenuOpen ? "w-48" : "w-0"}
           ${isCollapsed ? "md:w-16" : "md:w-64"}
           md:overflow-visible
         `}
@@ -66,7 +68,7 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:inline-flex appearance-none p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className="hidden md:inline-flex appearance-none px-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
           >
             {isCollapsed ? <Menu size={20} /> : <X size={20} />}
           </button>
@@ -75,7 +77,7 @@ export default function Sidebar() {
             type="button"
             onClick={closeMobileMenu}
             aria-label="Close menu"
-            className="md:hidden appearance-none p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className="md:hidden appearance-none rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
           >
             <X size={20} />
           </button>
@@ -90,7 +92,7 @@ export default function Sidebar() {
                 onClick={closeMobileMenu}
                 activeProps={{ className: "bg-sidebar-primary text-sidebar-primary-foreground" }}
                 className={`
-                  flex items-center gap-3 px-4 py-3 m-2 rounded-md
+                  flex items-center gap-3 pl-3.5 py-3 m-2 rounded-md
                   transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground
                 `}
               >
@@ -141,20 +143,27 @@ export default function Sidebar() {
           text-sidebar-foreground z-50 safe-area-inset-bottom
         `}
       >
-        <div className="flex h-full justify-evenly items-center py-2">
+        <div className={`grid h-full ${gridColsClass} py-2`}>
           {navItems.map(({ to, icon: Icon, label }) => {
             return (
               <Link
                 key={to}
                 to={to}
-                activeProps={{ className: "bg-sidebar-primary text-sidebar-primary-foreground" }}
-                className={`
-                  flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-md
-                  transition-colors hover:bg-sidebar-accent
-                `}
+                className="flex flex-col items-center justify-center gap-1 pb-2 px-4 rounded-md transition-colors hover:bg-sidebar-accent"
               >
-                <Icon size={20} />
-                <span className="text-xs">{label}</span>
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={`
+                          flex items-center justify-center rounded-xl px-3 p-1 transition-colors
+                          ${isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : ""}
+                        `}
+                    >
+                      <Icon size={20} />
+                    </span>
+                    <span className="text-xs">{label}</span>
+                  </>
+                )}
               </Link>
             );
           })}
