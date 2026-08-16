@@ -1,10 +1,12 @@
 import { useState } from "react"
 import { CalendarIcon } from "lucide-react"
+import LocationSearchField from "./LocationSearchField"
 import StarfinderResultPanel from "./StarfinderResultPanel"
 import StarfinderResultPanelSkeleton from "./StarfinderResultPanelSkeleton"
 import StarfinderTransitionsTabs from "./StarfinderTransitionsTabs"
 import StarfinderTransitionsTabsSkeleton from "./StarfinderTransitionsTabsSkeleton"
 import type { FormEvent } from "react"
+import type { ResolvedLocation } from "./LocationSearchField"
 import type { StarfinderParams } from "@/features/starfinder/hooks/useStarfinder"
 import TopAppBar from "@/components/shared/TopAppBar"
 import { Calendar } from "@/components/ui/calendar"
@@ -16,32 +18,30 @@ import { useReferenceMaps } from "@/features/panchangam/hooks/useReferenceMaps"
 import { Button } from "@/components/ui/button"
 import { useStarfinder } from "@/features/starfinder/hooks/useStarfinder"
 import { enrichPanchangamDay } from "@/features/panchangam/lib/enrichPanchangamData"
-import { APP_TIMEZONE, CALENDAR_END_DATE, STARFINDER_START_DATE } from "@/lib/constants"
+import { CALENDAR_END_DATE, STARFINDER_START_DATE } from "@/lib/constants"
 
 export default function StarfinderPage() {
   const [date, setDate] = useState<Date>(new Date())
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [timeOfDay, setTimeOfDay] = useState("12:00")
-  const [latitude, setLatitude] = useState("")
-  const [longitude, setLongitude] = useState("")
+  const [location, setLocation] = useState<ResolvedLocation | null>(null)
   const [submitted, setSubmitted] = useState<StarfinderParams | null>(null)
 
   const { referenceMaps, isLoading: isReferenceLoading } = useReferenceMaps()
   const query = useStarfinder(submitted)
 
-  const lat = Number(latitude)
-  const lon = Number(longitude)
-  const isValid =
-    timeOfDay.length > 0 &&
-    latitude.trim().length > 0 &&
-    longitude.trim().length > 0 &&
-    !Number.isNaN(lat) && lat >= -90 && lat <= 90 &&
-    !Number.isNaN(lon) && lon >= -180 && lon <= 180
+  const isValid = timeOfDay.length > 0 && location !== null
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!isValid) return
-    setSubmitted({ day: date, timeOfDay, latitude: lat, longitude: lon, timezone: APP_TIMEZONE })
+    setSubmitted({
+      day: date,
+      timeOfDay,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      timezone: location.timezone,
+    })
   }
 
   const enriched = submitted && query.data && !isReferenceLoading
@@ -108,34 +108,9 @@ export default function StarfinderPage() {
                   />
                 </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="starfinder-latitude">Latitude</FieldLabel>
-                  <Input
-                    id="starfinder-latitude"
-                    type="number"
-                    step="any"
-                    min={-90}
-                    max={90}
-                    placeholder="-90 to 90"
-                    value={latitude}
-                    onChange={(event) => setLatitude(event.target.value)}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="starfinder-longitude">Longitude</FieldLabel>
-                  <Input
-                    id="starfinder-longitude"
-                    type="number"
-                    step="any"
-                    min={-180}
-                    max={180}
-                    placeholder="-180 to 180"
-                    value={longitude}
-                    onChange={(event) => setLongitude(event.target.value)}
-                    required
-                  />
+                <Field className="col-span-2">
+                  <FieldLabel htmlFor="starfinder-location">Location</FieldLabel>
+                  <LocationSearchField id="starfinder-location" onLocationChange={setLocation} />
                 </Field>
               </div>
 
