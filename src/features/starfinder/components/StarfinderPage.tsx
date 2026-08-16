@@ -211,6 +211,7 @@ export default function StarfinderPage() {
                 thithi={enriched.thithi}
                 sunrise={enriched.sunrise}
                 sunset={enriched.sunset}
+                nazhikaFromSunrise={enriched.nazhika_from_sunrise}
                 timeZone={submitted.timezone}
               />
               <StarfinderThithiTransitionsCard
