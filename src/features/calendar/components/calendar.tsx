@@ -111,7 +111,7 @@ function PanchangamDayButton({ day, modifiers, className, children: _children, .
       ) : (
         <div className="h-4" />
       )}
-      <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle pt-0.5 lg:pt-2 font-bold", isNeighbouringMonth && "opacity-40")}>
+      <p className={cn("text-[14px] lg:text-3xl w-full text-center align-middle pt-0.5 md:pt-3 font-bold", isNeighbouringMonth && "opacity-40")}>
         {day.date.getDate()}
       </p>
       <div className={cn("flex items-baseline justify-between w-full min-w-0 gap-1 pb-1 px-1 mt-auto", isNeighbouringMonth && "opacity-40")}>
