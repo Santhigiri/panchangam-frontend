@@ -31,38 +31,43 @@ npm run test       # Vitest (run once)
 
 ### Routing
 
-Routes live in `src/routes/` and are auto-generated into `src/routeTree.gen.ts` by the TanStack Router Vite plugin — **never edit `routeTree.gen.ts` manually**. Current routes:
+Routes live in `src/routes/` and are auto-generated into `src/routeTree.gen.ts` by the TanStack Router Vite plugin — **never edit `routeTree.gen.ts` manually**. Route files are thin: each just imports its page component from the matching feature and renders it. Current routes:
 
-- `/` → `DayDetailsPage` (daily panchangam view)
-- `/calendar` → monthly calendar view
+- `/` → `features/day-details` (`DayDetailsPage`, daily panchangam view)
+- `/calendar` → `features/calendar` (monthly calendar view)
+- `/starfinder` → `features/starfinder` (panchangam at an arbitrary instant/location)
+- `/data` → `features/data-admin` (admin data table + generation UI)
+- `/settings` → `features/settings`
 
-The root layout (`src/routes/__root.tsx`) wraps everything with `QueryClientProvider` and `Sidebar`. The `shellComponent` (`RootDocument`) handles the HTML shell and PWA `RefreshPrompt`.
+The root layout (`src/routes/__root.tsx`) wraps everything with `QueryClientProvider`, `AuthProvider` (`features/auth`), `MobileSidebarProvider`, and `Sidebar`. The `shellComponent` (`RootDocument`) handles the HTML shell and PWA `RefreshPrompt`.
 
-### Data Flow
+### Feature-based architecture
 
-```
-API (panchangam-api)
-  └─ src/api/panchangam.ts          # fetch + Zod parse
-       └─ src/api/schemas/panchangamData.ts  # Zod schemas & TypeScript types
-  └─ src/hooks/usePanchangam.ts     # TanStack Query wrapper (caches per month, prefetches ±1 month)
-       └─ src/hooks/useDayDetails.ts        # activeDate state + day lookup from monthly cache
-```
+Code is organized by feature under `src/features/<name>/`, each with its own `api/`, `schemas/`, `hooks/`, and `components/` subfolders (only the ones a feature needs). A feature owns everything only it uses; anything genuinely shared across 3+ features lives in `src/features/panchangam/` (the core domain) or in the top-level `src/lib/` / `src/components/` (see below). Features may import from other features' modules (e.g. `data-admin` importing `panchangam`'s reference hooks) — that's expected; just don't reach past a feature's public files into internals that look accidental.
 
-`usePanchangam` fetches monthly data keyed by `["panchangam", year, month]`. All day lookups are derived from that cached monthly response — there is no per-day API endpoint.
+- **`features/panchangam/`** — the core shared domain. Owns `PanchangamDayData`/`CompactPanchangamData` schemas, the month/year fetch API, `enrichPanchangamDay`, reference-data hooks (nakshatra/thithi/masa/santhigiri-events lists), and the `DateHeader` card. Consumed by `calendar`, `day-details`, `starfinder`, and `data-admin`.
+- **`features/day-details/`** — the `/` route: `DayDetailsPage` plus its day-view cards (SunriseSunsetCard, ThithiTransitionCard, NakshatraTransitionCard, UpcomingEventsCard, GuruvaniCard), `useHomePanchangam`, and the sunrise/sunset + IP-geolocation API (only consumer of that domain).
+- **`features/calendar/`** — the `/calendar` monthly grid: `calendar.tsx`, `CalendarGridSkeleton`, `useCalendarPanchangam`.
+- **`features/starfinder/`** — the `/starfinder` route: panchangam-at-an-instant API, `useStarfinder`, result panel components.
+- **`features/guruvani/`** — "word of the day" API/cache/schema/hooks, used by both `day-details` (`GuruvaniCard`) and `data-admin` (CRUD tab).
+- **`features/santhigiri-events/`** — ashram event CRUD API/schema/hooks, used by `data-admin`'s event tab and composed into `panchangam`'s reference list.
+- **`features/data-admin/`** — the `/data` route: admin table page, per-entity tabs, columns, and CRUD dialogs.
+- **`features/settings/`** — the `/settings` route and its app-settings API/hooks.
+- **`features/auth/`** — `useAuth`/`AuthProvider`, `LoginDialog`, login API. `LoginDialog` is rendered by the shared `Sidebar`.
 
-### Key Types (from `src/api/schemas/panchangamData.ts`)
+### Shared, non-feature code
+
+- **`src/lib/`** — generic, feature-agnostic infra: `constants.ts`, `utils.ts`, `date.ts` (`dateToKey`), `query-client.ts`, and `lib/http/` (`conditionalFetch` — the ETag-aware fetch wrapper, `etagCache` — IndexedDB-backed cache, `httpErrors` — shared `UnauthorizedError`/`ForbiddenError`).
+- **`src/components/ui/`** — shadcn/ui primitives, unowned by any feature.
+- **`src/components/shared/`** — cross-feature layout chrome: `Sidebar`, `TopAppBar`, `RefreshPrompt`, `ThemeToggle`.
+- **`src/hooks/useMobileSidebar.tsx`** — app-shell state shared by `Sidebar`/`TopAppBar`/root layout; not feature-owned.
+
+### Key Types (from `src/features/panchangam/schemas/panchangamData.ts`)
 
 - `PanchangamDayData` — one day's full panchangam record
 - `ThithiTransition` / `NakshatraTransition` — time-bounded transitions within a day
 - `KollavarshamDate` — Malayalam calendar date
 - `SanthigiriSignificance` — ashram significant event name + description
-
-### UI Components
-
-- `src/components/ui/` — shadcn/ui primitives (Button, Card, Calendar, Popover, etc.)
-- `src/components/shared/` — layout chrome: `Sidebar` (desktop fixed left / mobile bottom nav), `TopAppBar` (mobile-only header), `RefreshPrompt` (PWA update banner)
-- `src/components/pages/calendar/` — calendar view cards (DateHeader, SunriseSunsetCard, ThithiTransitionCard, NakshatraTransitionCard, AshramSignificanceCard)
-- `src/components/pages/day-details/` — `DayDetailsPage` composes the calendar cards into the daily view
 
 ### shadcn/ui Setup
 
