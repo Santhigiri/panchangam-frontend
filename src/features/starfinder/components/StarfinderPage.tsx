@@ -1,17 +1,19 @@
 import { useState } from "react"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, MapPinIcon } from "lucide-react"
 import StarfinderResultPanel from "./StarfinderResultPanel"
 import StarfinderResultPanelSkeleton from "./StarfinderResultPanelSkeleton"
 import StarfinderTransitionsTabs from "./StarfinderTransitionsTabs"
 import StarfinderTransitionsTabsSkeleton from "./StarfinderTransitionsTabsSkeleton"
 import type { FormEvent } from "react"
+import type { LocationSearchResult } from "@/features/starfinder/schemas/locationSearchResult"
 import type { StarfinderParams } from "@/features/starfinder/hooks/useStarfinder"
 import TopAppBar from "@/components/shared/TopAppBar"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useLocationSearch } from "@/features/starfinder/hooks/useLocationSearch"
 import { useReferenceMaps } from "@/features/panchangam/hooks/useReferenceMaps"
 import { Button } from "@/components/ui/button"
 import { useStarfinder } from "@/features/starfinder/hooks/useStarfinder"
@@ -24,10 +26,20 @@ export default function StarfinderPage() {
   const [timeOfDay, setTimeOfDay] = useState("12:00")
   const [latitude, setLatitude] = useState("")
   const [longitude, setLongitude] = useState("")
+  const [locationQuery, setLocationQuery] = useState("")
+  const [locationResultsOpen, setLocationResultsOpen] = useState(false)
   const [submitted, setSubmitted] = useState<StarfinderParams | null>(null)
 
   const { referenceMaps, isLoading: isReferenceLoading } = useReferenceMaps()
   const query = useStarfinder(submitted)
+  const locationSearch = useLocationSearch(locationQuery)
+
+  function handleSelectLocation(result: LocationSearchResult) {
+    setLatitude(String(result.latitude))
+    setLongitude(String(result.longitude))
+    setLocationQuery(result.label)
+    setLocationResultsOpen(false)
+  }
 
   const lat = Number(latitude)
   const lon = Number(longitude)
@@ -56,6 +68,71 @@ export default function StarfinderPage() {
         <Card className="rounded-md py-4">
           <CardContent className="px-4">
             <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="starfinder-location-search">Location</FieldLabel>
+                <Popover open={locationResultsOpen} onOpenChange={setLocationResultsOpen}>
+                  <PopoverAnchor asChild>
+                    <div className="relative">
+                      <MapPinIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="starfinder-location-search"
+                        type="text"
+                        placeholder="Search for a city or place"
+                        className="pl-8"
+                        value={locationQuery}
+                        onChange={(event) => {
+                          const value = event.target.value
+                          setLocationQuery(value)
+                          setLocationResultsOpen(value.trim().length > 0)
+                        }}
+                        onFocus={() => {
+                          if (locationSearch.data && locationSearch.data.length > 0) {
+                            setLocationResultsOpen(true)
+                          }
+                        }}
+                        autoComplete="off"
+                      />
+                    </div>
+                  </PopoverAnchor>
+                  <PopoverContent
+                    className="w-(--radix-popover-trigger-width) p-1"
+                    align="start"
+                    onOpenAutoFocus={(event) => event.preventDefault()}
+                  >
+                    {locationQuery.trim().length < 3 ? (
+                      <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                        Type at least 3 characters to search.
+                      </p>
+                    ) : locationSearch.isFetching ? (
+                      <p className="px-2 py-1.5 text-sm text-muted-foreground">Searching…</p>
+                    ) : locationSearch.data && locationSearch.data.length > 0 ? (
+                      <ul className="flex flex-col">
+                        {locationSearch.data.map((result) => (
+                          <li key={result.label}>
+                            <button
+                              type="button"
+                              className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => handleSelectLocation(result)}
+                            >
+                              {result.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No matching places found.
+                      </p>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {latitude && longitude && (
+                  <p className="text-sm text-muted-foreground">
+                    {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
+                  </p>
+                )}
+              </Field>
+
               <div className="grid grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel htmlFor="starfinder-date">Date</FieldLabel>
@@ -104,36 +181,6 @@ export default function StarfinderPage() {
                     type="time"
                     value={timeOfDay}
                     onChange={(event) => setTimeOfDay(event.target.value)}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="starfinder-latitude">Latitude</FieldLabel>
-                  <Input
-                    id="starfinder-latitude"
-                    type="number"
-                    step="any"
-                    min={-90}
-                    max={90}
-                    placeholder="-90 to 90"
-                    value={latitude}
-                    onChange={(event) => setLatitude(event.target.value)}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="starfinder-longitude">Longitude</FieldLabel>
-                  <Input
-                    id="starfinder-longitude"
-                    type="number"
-                    step="any"
-                    min={-180}
-                    max={180}
-                    placeholder="-180 to 180"
-                    value={longitude}
-                    onChange={(event) => setLongitude(event.target.value)}
                     required
                   />
                 </Field>
