@@ -49,7 +49,7 @@ export default function StarfinderPage() {
     : undefined
 
   return (
-    <div className="flex flex-col items-stretch gap-4">
+    <div className="flex flex-col items-stretch">
       <TopAppBar title="Starfinder" />
 
       <form onSubmit={handleSubmit} className="px-2">
