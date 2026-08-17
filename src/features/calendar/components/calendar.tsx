@@ -1,7 +1,7 @@
-import { createContext, useContext } from "react"
+import { createContext, useContext, useRef } from "react"
 import { ChevronLeft, ChevronRight, InfoIcon, SunriseIcon, SunsetIcon } from "lucide-react";
 import CalendarGridSkeleton from "./CalendarGridSkeleton";
-import type { ComponentProps } from "react"
+import type { ComponentProps, TouchEvent } from "react"
 import type { PanchangamDayData } from "@/features/panchangam/schemas/panchangamData";
 import type { DayButton } from "react-day-picker";
 import DateHeader from "@/features/panchangam/components/DateHeader";
@@ -216,6 +216,8 @@ function PanchangamMonthCaption({ calendarMonth }: { calendarMonth: { date: Date
   )
 }
 
+const SWIPE_MIN_DISTANCE = 50
+
 export default function CalendarCustomDays() {
   const {
     activeDate,
@@ -226,6 +228,29 @@ export default function CalendarCustomDays() {
     startKey,
     endKey,
   } = useCalendarPanchangam();
+
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current
+    touchStartRef.current = null
+    if (!start) return
+
+    const touch = e.changedTouches[0]
+    const dx = touch.clientX - start.x
+    const dy = touch.clientY - start.y
+
+    if (Math.abs(dx) < SWIPE_MIN_DISTANCE || Math.abs(dx) < Math.abs(dy) * 1.5) return
+
+    const targetMonth = new Date(activeDate.getFullYear(), activeDate.getMonth() + (dx < 0 ? 1 : -1), 1)
+    if (targetMonth < CALENDAR_START_DATE || targetMonth > CALENDAR_END_DATE) return
+    setActiveDate(targetMonth)
+  }
 
   if (isLoading) {
     return (
@@ -256,7 +281,7 @@ export default function CalendarCustomDays() {
       <TopAppBar title="Calendar" />
       <CalendarDataContext.Provider value={{ monthData, activeMonth: activeDate, setActiveMonth: setActiveDate, startKey, endKey }}>
         <div className="w-full flex flex-col gap-2 items-center">
-          <div className="w-full">
+          <div className="w-full touch-pan-y" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             <Calendar
               mode="single"
               month={activeDate}
