@@ -145,6 +145,10 @@ export default function DayDetailsPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
+          <div className="md:col-span-2">
+            <GuruvaniCard />
+          </div>
+
           {activeDateData ? (
             <MalayalamDateCard
               thithi={activeDateData.thithi}
@@ -156,8 +160,6 @@ export default function DayDetailsPage() {
           ) : (
             <MalayalamDateCardSkeleton />
           )}
-
-          <GuruvaniCard />
 
           {sunrise && sunset ? (
             <SunriseSunsetCard
