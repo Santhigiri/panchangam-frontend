@@ -35,10 +35,11 @@ export default function Sidebar() {
   const navItems = role === "admin" ? [...baseNavItems, ...adminNavItems] : baseNavItems;
   const showLabels = !isCollapsed || isMobileMenuOpen;
   const gridColsClass = navItems.length === 5 ? "grid-cols-5" : "grid-cols-3";
-  // The location picker only drives Today's data so far — keep it out of the
-  // sidebar on other pages until they're wired up too, so it never implies
-  // an effect it doesn't have.
-  const showLocationPicker = pathname === "/";
+  // The location picker drives Today's and Calendar's data. Explore has its
+  // own independent place search (any location, not just this list), so it
+  // stays out of the sidebar there to avoid implying a connection that
+  // doesn't exist.
+  const showLocationPicker = pathname === "/" || pathname === "/calendar";
 
   function handleLogout() {
     logout();
